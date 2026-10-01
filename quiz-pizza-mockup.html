@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quiz Pizza — pagine di riferimento</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Work+Sans:wght@400;500;600;700&display=swap');
+
+:root{
+  --tomato:#D6402B;
+  --tomato-dark:#A62E1F;
+  --cheese:#F5B942;
+  --crust:#8B5A2B;
+  --crust-dark:#6B4423;
+  --basil:#4F7942;
+  --cream:#FFF8EC;
+  --paper:#FFFDF8;
+  --ink:#2B1B10;
+  --ink-soft:#6B5646;
+}
+
+*{box-sizing:border-box; margin:0; padding:0;}
+
+body{
+  font-family:'Work Sans', sans-serif;
+  background:
+    repeating-linear-gradient(135deg, rgba(139,90,43,0.05) 0 2px, transparent 2px 26px),
+    var(--paper);
+  color:var(--ink);
+  padding:56px 32px 80px;
+}
+
+.page-head{
+  max-width:1200px;
+  margin:0 auto 44px;
+}
+.page-head h1{
+  font-family:'Fredoka', sans-serif;
+  font-size:32px;
+  font-weight:600;
+  color:var(--tomato-dark);
+}
+.page-head p{
+  margin-top:8px;
+  color:var(--ink-soft);
+  font-size:15px;
+  max-width:560px;
+  line-height:1.5;
+}
+
+.rail{
+  display:flex;
+  gap:28px;
+  overflow-x:auto;
+  padding-bottom:24px;
+  max-width:1400px;
+  margin:0 auto;
+}
+
+.phone{
+  flex:0 0 250px;
+  background:var(--cream);
+  border-radius:32px;
+  border:3px solid var(--crust);
+  padding:18px 16px 22px;
+  display:flex;
+  flex-direction:column;
+  min-height:540px;
+  position:relative;
+  box-shadow:0 10px 0 rgba(139,90,43,0.12);
+}
+
+.phone-label{
+  position:absolute;
+  top:-30px;
+  left:0;
+  font-family:'Fredoka', sans-serif;
+  font-size:14px;
+  font-weight:600;
+  color:var(--ink-soft);
+}
+
+.vents{
+  display:flex;
+  gap:6px;
+  justify-content:center;
+  margin-bottom:14px;
+}
+.vents span{
+  width:5px; height:5px; border-radius:50%;
+  background:var(--crust);
+  opacity:.35;
+}
+
+/* progress dots */
+.progress{
+  display:flex;
+  gap:6px;
+  justify-content:center;
+  margin-bottom:18px;
+}
+.progress i{
+  width:8px; height:8px; border-radius:50%;
+  background:#E7D9C4;
+  display:block;
+}
+.progress i.done{background:var(--basil);}
+.progress i.now{background:var(--tomato); width:20px; border-radius:5px;}
+
+.mascot-wrap{
+  display:flex;
+  justify-content:center;
+  margin-bottom:14px;
+}
+.mascot-wrap svg{
+  filter:drop-shadow(0 6px 0 rgba(139,90,43,0.15));
+}
+.bob{ animation:bob 2.6s ease-in-out infinite; }
+@keyframes bob{
+  0%,100%{ transform:translateY(0); }
+  50%{ transform:translateY(-6px); }
+}
+
+h2.title{
+  font-family:'Fredoka', sans-serif;
+  font-size:20px;
+  font-weight:600;
+  text-align:center;
+  line-height:1.25;
+  margin-bottom:8px;
+}
+p.sub{
+  text-align:center;
+  font-size:13px;
+  color:var(--ink-soft);
+  line-height:1.5;
+  margin-bottom:18px;
+}
+
+.qtag{
+  font-size:12px;
+  color:var(--ink-soft);
+  text-align:center;
+  margin-bottom:6px;
+}
+.question{
+  font-family:'Fredoka', sans-serif;
+  font-size:17px;
+  font-weight:600;
+  text-align:center;
+  line-height:1.3;
+  margin-bottom:16px;
+}
+
+.options{
+  display:flex;
+  flex-direction:column;
+  gap:9px;
+  margin-bottom:auto;
+}
+.opt{
+  border:2px solid #E7D9C4;
+  background:var(--paper);
+  border-radius:14px;
+  padding:11px 14px;
+  font-size:13.5px;
+  font-weight:500;
+  color:var(--ink);
+}
+.opt.correct{
+  border-color:var(--basil);
+  background:#EEF4E9;
+  color:#3B5C31;
+  font-weight:600;
+}
+.opt.wrong{
+  border-color:var(--tomato);
+  background:#FBEAE6;
+  color:var(--tomato-dark);
+  font-weight:600;
+}
+.opt.outline-correct{
+  border-color:var(--basil);
+  border-style:dashed;
+  color:#3B5C31;
+}
+
+.toast{
+  margin-top:14px;
+  text-align:center;
+  font-size:13px;
+  font-weight:600;
+  padding:9px;
+  border-radius:12px;
+}
+.toast.good{ background:#EEF4E9; color:#3B5C31; }
+.toast.bad{ background:#FBEAE6; color:var(--tomato-dark); }
+
+.spacer{ flex:1; }
+
+.btn{
+  margin-top:16px;
+  background:var(--tomato);
+  color:var(--paper);
+  border:none;
+  border-radius:14px;
+  padding:13px;
+  font-family:'Fredoka', sans-serif;
+  font-size:14.5px;
+  font-weight:600;
+  text-align:center;
+}
+.btn.ghost{
+  background:transparent;
+  color:var(--tomato);
+  border:2px solid var(--tomato);
+}
+
+.score{
+  font-family:'Fredoka', sans-serif;
+  font-size:52px;
+  font-weight:700;
+  text-align:center;
+  color:var(--tomato-dark);
+  line-height:1;
+  margin:6px 0 4px;
+}
+.score-label{
+  text-align:center;
+  font-size:12px;
+  color:var(--ink-soft);
+  margin-bottom:16px;
+}
+</style>
+</head>
+<body>
+
+<div class="page-head">
+  <h1>Quiz sulla pizza: pagine di riferimento</h1>
+  <p>Cinque schermate pensate per il flow con variabili: la mascotte resta in stato neutro finché non rispondi, poi reagisce felice o triste in base all'esito, sullo stesso frame.</p>
+</div>
+
+<div class="rail">
+
+  <!-- INIZIO -->
+  <div class="phone">
+    <div class="phone-label">Inizio</div>
+    <div class="vents"><span></span><span></span><span></span></div>
+    <div class="mascot-wrap bob">
+      <svg width="96" height="96" viewBox="0 0 120 120">
+        <path d="M60,14 L108,98 Q60,118 12,98 Z" fill="#F5B942" stroke="#8B5A2B" stroke-width="4"/>
+        <path d="M18,92 Q60,110 102,92" fill="none" stroke="#8B5A2B" stroke-width="8" stroke-linecap="round"/>
+        <circle cx="46" cy="62" r="6" fill="#D6402B"/>
+        <circle cx="74" cy="68" r="6" fill="#D6402B"/>
+        <circle cx="60" cy="48" r="6" fill="#D6402B"/>
+        <circle cx="43" cy="80" r="5" fill="#B8383F"/>
+        <circle cx="73" cy="80" r="5" fill="#B8383F"/>
+        <line x1="46" y1="62" x2="52" y2="67" stroke="#2B1B10" stroke-width="4.5" stroke-linecap="round"/>
+        <line x1="74" y1="62" x2="68" y2="67" stroke="#2B1B10" stroke-width="4.5" stroke-linecap="round"/>
+        <path d="M52,80 Q60,84 68,80" fill="none" stroke="#2B1B10" stroke-width="4.5" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <h2 class="title">Quanto ne sai di pizza?</h2>
+    <p class="sub">5 domande di cultura generale. Ogni risposta giusta vale un punto: alla fine scopri il tuo punteggio.</p>
+    <div class="spacer"></div>
+    <div class="btn">Inizia</div>
+  </div>
+
+  <!-- DOMANDA - stato default -->
+  <div class="phone">
+    <div class="phone-label">Domanda · default</div>
+    <div class="progress">
+      <i class="done"></i><i class="now"></i><i></i><i></i><i></i>
+    </div>
+    <div class="mascot-wrap bob">
+      <svg width="80" height="80" viewBox="0 0 120 120">
+        <path d="M60,14 L108,98 Q60,118 12,98 Z" fill="#F5B942" stroke="#8B5A2B" stroke-width="4"/>
+        <path d="M18,92 Q60,110 102,92" fill="none" stroke="#8B5A2B" stroke-width="8" stroke-linecap="round"/>
+        <circle cx="46" cy="62" r="6" fill="#D6402B"/>
+        <circle cx="74" cy="68" r="6" fill="#D6402B"/>
+        <circle cx="60" cy="48" r="6" fill="#D6402B"/>
+        <circle cx="46" cy="63" r="4.5" fill="#2B1B10"/>
+        <circle cx="74" cy="63" r="4.5" fill="#2B1B10"/>
+        <path d="M52,80 Q60,83 68,80" fill="none" stroke="#2B1B10" stroke-width="4" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div class="qtag">Domanda 2 di 5</div>
+    <div class="question">Da dove ha origine la pizza Margherita?</div>
+    <div class="options">
+      <div class="opt">Napoli</div>
+      <div class="opt">Roma</div>
+      <div class="opt">Milano</div>
+      <div class="opt">Palermo</div>
+    </div>
+  </div>
+
+  <!-- DOMANDA - risposta corretta -->
+  <div class="phone">
+    <div class="phone-label">Feedback · corretto</div>
+    <div class="progress">
+      <i class="done"></i><i class="now"></i><i></i><i></i><i></i>
+    </div>
+    <div class="mascot-wrap bob">
+      <svg width="80" height="80" viewBox="0 0 120 120">
+        <path d="M60,14 L108,98 Q60,118 12,98 Z" fill="#F5B942" stroke="#8B5A2B" stroke-width="4"/>
+        <path d="M18,92 Q60,110 102,92" fill="none" stroke="#8B5A2B" stroke-width="8" stroke-linecap="round"/>
+        <circle cx="46" cy="62" r="6" fill="#D6402B"/>
+        <circle cx="74" cy="68" r="6" fill="#D6402B"/>
+        <circle cx="60" cy="48" r="6" fill="#D6402B"/>
+        <circle cx="42" cy="79" r="6" fill="#F6B4AE"/>
+        <circle cx="77" cy="79" r="6" fill="#F6B4AE"/>
+        <path d="M38,58 Q46,50 54,58" fill="none" stroke="#2B1B10" stroke-width="4" stroke-linecap="round"/>
+        <path d="M66,58 Q74,50 82,58" fill="none" stroke="#2B1B10" stroke-width="4" stroke-linecap="round"/>
+        <path d="M44,76 Q60,96 76,76" fill="#B8383F" stroke="#2B1B10" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <div class="qtag">Domanda 2 di 5</div>
+    <div class="question">Da dove ha origine la pizza Margherita?</div>
+    <div class="options">
+      <div class="opt correct">Napoli</div>
+      <div class="opt">Roma</div>
+      <div class="opt">Milano</div>
+      <div class="opt">Palermo</div>
+    </div>
+    <div class="toast good">Esatto! La Margherita nasce a Napoli.</div>
+    <div class="spacer"></div>
+    <div class="btn">Avanti</div>
+  </div>
+
+  <!-- DOMANDA - risposta sbagliata -->
+  <div class="phone">
+    <div class="phone-label">Feedback · sbagliato</div>
+    <div class="progress">
+      <i class="done"></i><i class="now"></i><i></i><i></i><i></i>
+    </div>
+    <div class="mascot-wrap bob">
+      <svg width="80" height="80" viewBox="0 0 120 120">
+        <path d="M60,14 L108,98 Q60,118 12,98 Z" fill="#F5B942" stroke="#8B5A2B" stroke-width="4"/>
+        <path d="M18,92 Q60,110 102,92" fill="none" stroke="#8B5A2B" stroke-width="8" stroke-linecap="round"/>
+        <circle cx="46" cy="62" r="6" fill="#D6402B"/>
+        <circle cx="74" cy="68" r="6" fill="#D6402B"/>
+        <circle cx="60" cy="48" r="6" fill="#D6402B"/>
+        <line x1="38" y1="54" x2="52" y2="60" stroke="#2B1B10" stroke-width="4.5" stroke-linecap="round"/>
+        <line x1="82" y1="54" x2="68" y2="60" stroke="#2B1B10" stroke-width="4.5" stroke-linecap="round"/>
+        <circle cx="46" cy="66" r="4.5" fill="#2B1B10"/>
+        <circle cx="74" cy="66" r="4.5" fill="#2B1B10"/>
+        <path d="M46,86 Q60,74 74,86" fill="none" stroke="#2B1B10" stroke-width="4.5" stroke-linecap="round"/>
+        <path d="M78,64 q3,8 -2,12" fill="none" stroke="#6FB3E0" stroke-width="3.5" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div class="qtag">Domanda 2 di 5</div>
+    <div class="question">Da dove ha origine la pizza Margherita?</div>
+    <div class="options">
+      <div class="opt wrong">Roma</div>
+      <div class="opt outline-correct">Napoli</div>
+      <div class="opt">Milano</div>
+      <div class="opt">Palermo</div>
+    </div>
+    <div class="toast bad">Non proprio: la risposta giusta era Napoli.</div>
+    <div class="spacer"></div>
+    <div class="btn">Avanti</div>
+  </div>
+
+  <!-- RISULTATO -->
+  <div class="phone">
+    <div class="phone-label">Risultato</div>
+    <div class="vents"><span></span><span></span><span></span></div>
+    <div class="mascot-wrap bob">
+      <svg width="96" height="96" viewBox="0 0 120 120">
+        <path d="M60,14 L108,98 Q60,118 12,98 Z" fill="#F5B942" stroke="#8B5A2B" stroke-width="4"/>
+        <path d="M18,92 Q60,110 102,92" fill="none" stroke="#8B5A2B" stroke-width="8" stroke-linecap="round"/>
+        <circle cx="46" cy="62" r="6" fill="#D6402B"/>
+        <circle cx="74" cy="68" r="6" fill="#D6402B"/>
+        <circle cx="60" cy="48" r="6" fill="#D6402B"/>
+        <circle cx="42" cy="79" r="6" fill="#F6B4AE"/>
+        <circle cx="77" cy="79" r="6" fill="#F6B4AE"/>
+        <path d="M38,58 Q46,50 54,58" fill="none" stroke="#2B1B10" stroke-width="4" stroke-linecap="round"/>
+        <path d="M66,58 Q74,50 82,58" fill="none" stroke="#2B1B10" stroke-width="4" stroke-linecap="round"/>
+        <path d="M44,76 Q60,96 76,76" fill="#B8383F" stroke="#2B1B10" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <div class="score">4/5</div>
+    <div class="score-label">Sei quasi un pizzaiolo esperto</div>
+    <div class="spacer"></div>
+    <div class="btn">Ricomincia</div>
+    <div class="btn ghost" style="margin-top:10px;">Condividi il punteggio</div>
+  </div>
+
+</div>
+
+</body>
+</html>
