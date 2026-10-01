@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ultima Revisione</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bangers&family=Comic+Neue:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #fff3cf;
+    --paper: #ffffff;
+    --ink: #1a1a1a;
+    --muted: #5f5a52;
+    --accent: #3b5bdb;
+    --good: #2b8a3e;
+    --warn: #e8590c;
+    --bad: #e03131;
+    --yellow: #ffd43b;
+    --me: #e5dbff;
+    --comic: "Bangers", Impact, "Arial Black", sans-serif;
+    color-scheme: light;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: radial-gradient(circle, rgba(0,0,0,.08) 1.2px, transparent 1.6px) 0 0 / 14px 14px, var(--bg);
+    color: var(--ink);
+    font-family: "Comic Neue", "Comic Sans MS", system-ui, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding: 16px;
+  }
+  main { width: 100%; max-width: 780px; }
+  .card { background: var(--paper); border: 3px solid var(--ink); border-radius: 14px; box-shadow: 5px 5px 0 var(--ink); }
+
+  header { margin-bottom: 10px; }
+  h1 { margin: 0; font-family: var(--comic); font-weight: 400; letter-spacing: .04em; font-size: clamp(2.3rem, 8vw, 3.4rem); line-height: 1; text-shadow: 3px 3px 0 var(--yellow); }
+  h1 span { color: var(--accent); }
+  .sub { color: var(--muted); margin: 6px 0 0; font-weight: 700; }
+
+  .stats { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin: 14px 0; }
+  .stat { padding: 8px 6px; text-align: center; border-radius: 10px; box-shadow: 3px 3px 0 var(--ink); }
+  .stat .lbl { font-size: .72rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 700; }
+  .stat .val { font-family: var(--comic); font-size: 1.45rem; letter-spacing: .03em; margin-top: 2px; }
+  .stat.earn .val { color: var(--good); }
+
+  /* ---------- brief ---------- */
+  .brief { padding: 14px; margin-bottom: 14px; }
+  .brief-head { display: grid; grid-template-columns: 92px 1fr 118px; gap: 14px; align-items: center; }
+  .portrait { width: 92px; height: 92px; }
+  .portrait svg, .hd svg { width: 100%; height: 100%; display: block; }
+  .client { font-family: var(--comic); font-size: 1.5rem; letter-spacing: .03em; line-height: 1.05; }
+  .who-line { font-weight: 700; color: var(--muted); font-size: .92rem; margin-top: 2px; }
+  .job { font-size: .95rem; margin-top: 2px; }
+  .temper { display: inline-block; margin-top: 6px; font-size: .78rem; font-weight: 700; padding: 2px 10px; border-radius: 99px; background: var(--yellow); border: 2px solid var(--ink); }
+  .thumb { width: 118px; height: 118px; border: 2.5px solid var(--ink); border-radius: 10px; background: #efe9dd; display: grid; place-items: center; cursor: pointer; position: relative; padding: 6px 6px 22px; font: inherit; box-shadow: 3px 3px 0 var(--ink); }
+  .thumb:hover { background: #e7dfcf; }
+  .thumb:active { transform: translate(2px,2px); box-shadow: 1px 1px 0 var(--ink); }
+  .thumb .tlbl { position: absolute; left: 0; right: 0; bottom: 3px; font-size: .72rem; font-weight: 700; text-align: center; }
+  .thumb-art { width: calc(80px * min(1, var(--r))); }
+
+  .meters { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 14px; }
+  .meter .top { display: flex; justify-content: space-between; font-size: .9rem; font-weight: 700; margin-bottom: 5px; }
+  .meter .top b { font-family: var(--comic); font-size: 1.1rem; font-weight: 400; letter-spacing: .03em; }
+  .bar { height: 14px; background: #f1ece2; border: 2px solid var(--ink); border-radius: 99px; overflow: hidden; }
+  .bar i { display: block; height: 100%; width: 0; transition: width .4s ease, background-color .4s; }
+  #qBar { background: var(--accent); }
+  .fee-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+  .fee { font-size: .92rem; font-weight: 700; color: var(--muted); padding: 8px 12px; border-radius: 10px; background: #f6f2ea; border: 2px dashed #c9c1b2; }
+  .fee b { display: block; font-family: var(--comic); font-weight: 400; font-size: 1.35rem; letter-spacing: .03em; margin-top: 1px; }
+  .fee.win b { color: var(--good); }
+  .fee.lose b { color: var(--bad); }
+
+  /* ---------- fumetto ---------- */
+  .strip { height: 360px; overflow-y: auto; padding: 16px 14px; display: flex; flex-direction: column; gap: 14px; scroll-behavior: smooth; }
+  .msg { display: flex; align-items: flex-end; gap: 12px; max-width: 92%; animation: pop .28s ease both; }
+  .msg.me { align-self: flex-end; flex-direction: row-reverse; }
+  .hd { width: 50px; height: 50px; flex-shrink: 0; }
+  .balloon { position: relative; background: #fff; border: 2.5px solid var(--ink); border-radius: 22px; padding: 8px 14px 10px; line-height: 1.42; font-size: 1rem; margin-bottom: 6px; }
+  .msg.me .balloon { background: var(--me); }
+  .balloon .who { font-family: var(--comic); letter-spacing: .05em; font-size: .9rem; color: var(--muted); display: block; margin-bottom: 1px; }
+  .msg.client .balloon::before, .msg.client .balloon::after,
+  .msg.me .balloon::before, .msg.me .balloon::after { content: ""; position: absolute; border-style: solid; }
+  .msg.client .balloon::before { left: -16px; bottom: 6px; border-width: 9px 16px 2px 0; border-color: transparent var(--ink) transparent transparent; }
+  .msg.client .balloon::after { left: -10.5px; bottom: 9px; border-width: 6px 11px 1px 0; border-color: transparent #fff transparent transparent; }
+  .msg.me .balloon::before { right: -16px; bottom: 6px; border-width: 9px 0 2px 16px; border-color: transparent transparent transparent var(--ink); }
+  .msg.me .balloon::after { right: -10.5px; bottom: 9px; border-width: 6px 0 1px 11px; border-color: transparent transparent transparent var(--me); }
+  .gain { display: inline-block; margin-top: 6px; background: var(--yellow); border: 2px solid var(--ink); border-radius: 99px; padding: 0 9px; font-weight: 700; font-size: .85rem; }
+  .idea { display: block; margin-top: 6px; padding-top: 6px; border-top: 2px dotted #9b8ad1; }
+  .caption { align-self: flex-start; background: var(--yellow); border: 2.5px solid var(--ink); padding: 4px 12px; font-weight: 700; font-size: .82rem; text-transform: uppercase; letter-spacing: .04em; transform: rotate(-1deg); box-shadow: 3px 3px 0 var(--ink); animation: pop .25s ease both; }
+  .boom { align-self: center; font-family: var(--comic); font-size: 2.4rem; letter-spacing: .06em; color: #fff; background: var(--bad); padding: 30px 46px; text-shadow: 2px 2px 0 var(--ink);
+    clip-path: polygon(50% 0, 59% 22%, 82% 6%, 75% 31%, 100% 30%, 80% 48%, 98% 68%, 72% 66%, 78% 94%, 57% 76%, 46% 100%, 39% 76%, 15% 92%, 22% 66%, 0 64%, 20% 48%, 3% 26%, 28% 30%, 20% 5%, 42% 21%);
+    animation: boom .35s cubic-bezier(.2,1.6,.4,1) both; }
+  @keyframes boom { from { transform: scale(.2) rotate(-20deg); } to { transform: scale(1) rotate(-4deg); } }
+  .dots span { display: inline-block; width: 7px; height: 7px; margin: 0 2px; border-radius: 50%; background: var(--ink); animation: blink 1s infinite; }
+  .dots span:nth-child(2) { animation-delay: .15s; } .dots span:nth-child(3) { animation-delay: .3s; }
+  @keyframes blink { 0%,100% { opacity: .2; } 50% { opacity: 1; } }
+  @keyframes pop { from { transform: translateY(8px) scale(.96); opacity: 0; } to { transform: none; opacity: 1; } }
+  .shake { animation: shake .4s; }
+  @keyframes shake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-7px); } 75% { transform: translateX(7px); } }
+
+  /* ---------- pulsanti ---------- */
+  .actions { display: grid; grid-template-columns: 1.2fr 1fr 1.2fr; gap: 10px; margin-top: 16px; }
+  button { font: inherit; font-weight: 700; font-size: 1.05rem; padding: 13px 10px; border-radius: 12px; border: 3px solid var(--ink); box-shadow: 4px 4px 0 var(--ink); cursor: pointer; transition: transform .08s, box-shadow .08s, filter .15s, opacity .15s; }
+  button:active:not(:disabled) { transform: translate(3px,3px); box-shadow: 1px 1px 0 var(--ink); }
+  button:disabled { opacity: .45; cursor: not-allowed; }
+  button:not(:disabled):hover { filter: brightness(1.07); }
+  .rev { background: var(--accent); color: #fff; }
+  .peek { background: var(--yellow); color: var(--ink); }
+  .ship { background: var(--good); color: #fff; }
+  .ghost { background: #fff; color: var(--ink); }
+  .keys { text-align: center; color: var(--muted); font-size: .82rem; margin-top: 10px; font-weight: 700; }
+
+  details { margin-top: 18px; padding: 10px 14px; }
+  summary { cursor: pointer; font-family: var(--comic); font-size: 1.2rem; letter-spacing: .04em; }
+  details li { color: var(--muted); font-size: .95rem; line-height: 1.5; }
+
+  /* ---------- modali ---------- */
+  .overlay { position: fixed; inset: 0; background: rgba(26,26,26,.6); display: none; align-items: center; justify-content: center; padding: 16px; z-index: 10; }
+  .overlay.show { display: flex; }
+  .modal { padding: 22px; max-width: 440px; width: 100%; text-align: center; animation: pop .25s ease both; max-height: calc(100vh - 32px); overflow-y: auto; }
+  .modal.wide { max-width: 620px; }
+  .modal h2 { margin: 0 0 6px; font-family: var(--comic); font-weight: 400; letter-spacing: .04em; font-size: 1.9rem; }
+  .modal p { color: var(--muted); line-height: 1.5; margin: 6px 0; }
+  .modal .big { font-family: var(--comic); font-size: 2.6rem; letter-spacing: .03em; margin: 4px 0; }
+  .modal .btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
+  .modal .one { width: 100%; margin-top: 12px; }
+  .summary { text-align: left; margin: 12px 0; font-size: .92rem; border-top: 2px solid var(--ink); }
+  .summary div { display: flex; justify-content: space-between; gap: 8px; padding: 6px 0; border-bottom: 1px dashed #bbb; }
+  .pv-wrap { background: #efe9dd; border: 2.5px solid var(--ink); border-radius: 12px; padding: 18px; display: grid; place-items: center; margin: 10px 0; background-image: radial-gradient(circle, rgba(0,0,0,.07) 1px, transparent 1.3px); background-size: 12px 12px; }
+  .pv-art { width: min(100%, calc(48vh * var(--r))); box-shadow: 0 10px 24px rgba(0,0,0,.25); }
+  .pv-info { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; font-size: .9rem; font-weight: 700; }
+  .pv-info span { background: #f6f2ea; border: 2px solid var(--ink); border-radius: 99px; padding: 2px 10px; }
+  .m-art { position: relative; width: min(230px, calc(210px * var(--r))); margin: 10px auto; box-shadow: 0 8px 18px rgba(0,0,0,.2); }
+  .m-art .stamp { position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%) rotate(-14deg); font-family: var(--comic); font-size: 2rem; letter-spacing: .06em; color: var(--bad); border: 4px solid var(--bad); padding: 2px 12px; background: rgba(255,255,255,.85); border-radius: 6px; }
+  .m-art.trashed .art { filter: grayscale(1) contrast(.85) brightness(1.05); }
+
+  /* ================= ANTEPRIMA DEL PROGETTO ================= */
+  .art {
+    --c: #c0392b; --c2: #2e7d4f; --pbg: #fffaf2; --pink: #1d1b19; --pad: 7cqw; --tb: 8;
+    position: relative; container-type: inline-size; width: 100%; aspect-ratio: var(--ar, 3/4);
+    overflow: hidden; background: var(--pbg); color: var(--pink); font-family: var(--pf); border-radius: 3px; line-height: 1.15; text-align: left;
+  }
+  .art.dark { --pbg: #141a2c; --pink: #f3efe6; }
+  .art.grad { background: linear-gradient(150deg, var(--pbg) 30%, color-mix(in srgb, var(--c2) 50%, var(--pbg))); }
+  .art.tight { --pad: 3.5cqw; }
+  .art.airy { --pad: 10cqw; }
+  .art .in { position: absolute; inset: 0; padding: var(--pad); display: flex; flex-direction: column; gap: 2.6cqw; }
+  .art.hasfoot .in { padding-bottom: calc(var(--pad) + 6cqw); }
+  .art .ttl { font-size: calc(var(--tb) * 1cqw * var(--ts)); font-weight: 800; line-height: 1; color: var(--c); }
+  .art.dark .ttl { color: color-mix(in srgb, var(--c) 45%, #fff); }
+  .art .lg { width: calc(13cqw * var(--ls)); height: calc(13cqw * var(--ls)); border-radius: 50%; background: var(--c); color: #fff; display: grid; place-items: center; font-size: calc(6.5cqw * var(--ls)); font-weight: 800; flex-shrink: 0; }
+  .art.round .lg { border-radius: 30%; }
+  .art .sm { font-size: 3.2cqw; opacity: .8; }
+  .art .row { display: flex; align-items: center; gap: 3cqw; }
+  .art .orn { display: none; height: .6cqw; background: linear-gradient(90deg, transparent, var(--c2), transparent); flex-shrink: 0; }
+  .art.fine .orn { display: block; }
+  .art.fine .lg { box-shadow: 0 0 0 .8cqw var(--pbg), 0 0 0 1.3cqw var(--c2); }
+  .art.rough .ttl { transform: rotate(-2deg); }
+  .art.rough .in { filter: saturate(.55); }
+  .art.rough .blk { outline: .4cqw dashed currentColor; outline-offset: .6cqw; }
+  .art.rough::after { content: "BOZZA"; position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%) rotate(-25deg); font: 900 16cqw/1 system-ui, sans-serif; color: rgba(120,120,120,.13); pointer-events: none; z-index: 5; }
+  .art .seal { display: none; position: absolute; left: 3cqw; top: 3cqw; width: 12cqw; height: 12cqw; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fff3b0, #d4a017 60%, #9a7209); color: #5a3e00; place-items: center; font: 900 6cqw/1 system-ui; z-index: 4; box-shadow: 0 .5cqw 1cqw rgba(0,0,0,.3); }
+  .art.gold .seal { display: grid; }
+  .art.round .blk, .art.round .sg, .art.round .cta, .art.round .himg, .art.round .lab { border-radius: 4cqw !important; }
+
+  /* extra comuni */
+  .x-slogan { font-style: italic; font-size: 4cqw; color: var(--c2); font-weight: 700; }
+  .art.dark .x-slogan { color: color-mix(in srgb, var(--c2) 55%, #fff); }
+  .x-badge { position: absolute; top: 4cqw; right: 4cqw; width: 17cqw; height: 17cqw; border-radius: 50%; background: var(--c2); color: #fff; display: grid; place-items: center; font: 900 3.5cqw/1 system-ui, sans-serif; transform: rotate(14deg); box-shadow: 0 .7cqw 0 rgba(0,0,0,.25); z-index: 3; border: .6cqw dashed rgba(255,255,255,.7); }
+  .x-qr { position: absolute; right: 4cqw; bottom: 4cqw; width: 13cqw; height: 13cqw; background: repeating-conic-gradient(#111 0 25%, #fff 0 50%) 0 0 / 3.2cqw 3.2cqw; border: 1cqw solid #fff; outline: .3cqw solid #111; z-index: 3; }
+  .art.hasfoot .x-qr { bottom: 9cqw; }
+  .x-foot { position: absolute; left: 0; right: 0; bottom: 0; padding: 1.8cqw var(--pad); font: 700 2.8cqw/1.2 system-ui, sans-serif; background: color-mix(in srgb, var(--c) 75%, #000); color: #fff; z-index: 2; }
+  .x-stock { position: absolute; left: 5cqw; bottom: 10cqw; width: 30cqw; height: 20cqw; border-radius: 1cqw; background: linear-gradient(#9fd3ff, #fff3c4); display: flex; align-items: flex-end; justify-content: center; font-size: 7.5cqw; line-height: 1.1; border: .8cqw solid #fff; box-shadow: 0 1cqw 2cqw rgba(0,0,0,.25); transform: rotate(-4deg); z-index: 3; }
+  .x-spark { position: absolute; font-size: 6cqw; z-index: 3; }
+
+  .t-slide .x-stock, .t-website .x-stock, .t-logo .x-stock, .t-signage .x-stock { width: 20cqw; height: 13cqw; font-size: 5cqw; bottom: 8cqw; left: 3cqw; }
+  .t-slide .x-qr, .t-website .x-qr, .t-logo .x-qr, .t-signage .x-qr { width: 9cqw; height: 9cqw; background-size: 2.2cqw 2.2cqw; }
+  .t-signage .in { gap: 1.8cqw; }
+  .t-slide .ttl { font-size: calc(var(--tb) * 1cqw * min(var(--ts), 1.25)); }
+
+  /* menù pizzeria */
+  .t-menu .list { display: flex; flex-direction: column; }
+  .t-menu .li { display: flex; justify-content: space-between; font-size: 4.3cqw; border-bottom: .3cqw dotted currentColor; padding: 1.4cqw 0; }
+  .t-menu .li.top { font-weight: 800; color: var(--c); }
+  .art.dark.t-menu .li.top { color: color-mix(in srgb, var(--c) 45%, #fff); }
+  .t-menu .nonno { display: flex; gap: 3cqw; align-items: center; background: #f3e3c3; color: #4a3520; padding: 2cqw; border-radius: 1cqw; font-size: 3.4cqw; filter: sepia(.5); }
+  .t-menu .nonno span:first-child { font-size: 10cqw; }
+
+  /* logo studio legale */
+  .t-logo .in { align-items: center; justify-content: center; text-align: center; }
+  .t-logo .lg { width: calc(22cqw * var(--ls)); height: calc(22cqw * var(--ls)); font-size: calc(10cqw * var(--ls)); }
+  .t-logo .amp { font-size: .55em; }
+  .t-logo .caps { letter-spacing: .3em; text-transform: uppercase; font-size: 2.8cqw; }
+  .t-logo .orn { width: 40%; }
+
+  /* slide startup */
+  .t-slide .in { flex-direction: row; align-items: center; gap: 5cqw; }
+  .t-slide .left { flex: 1; display: flex; flex-direction: column; gap: 2cqw; }
+  .t-slide .lg { width: calc(8cqw * var(--ls)); height: calc(8cqw * var(--ls)); font-size: calc(4cqw * var(--ls)); }
+  .t-slide .subt { font-size: 3.2cqw; }
+  .t-slide .chip { align-self: flex-start; font: 800 2.4cqw/1 system-ui; padding: 1cqw 2cqw; border-radius: 99px; background: var(--c2); color: #fff; }
+  .t-slide .chart { flex: 0 0 38cqw; height: 34cqw; display: flex; align-items: flex-end; gap: 1.2cqw; border-left: .4cqw solid currentColor; border-bottom: .4cqw solid currentColor; padding: 0 1.5cqw; position: relative; }
+  .t-slide .chart i { flex: 1; background: var(--c); border-radius: .6cqw .6cqw 0 0; }
+  .t-slide .chart i:last-child { background: var(--c2); }
+  .t-slide .chart b { position: absolute; top: -2cqw; right: 0; font-size: 6cqw; }
+
+  /* manifesto festival */
+  .t-poster .shapes { position: relative; height: 34cqw; flex-shrink: 0; }
+  .t-poster .shapes i { position: absolute; }
+  .t-poster .shapes i:nth-child(1) { width: 30cqw; height: 30cqw; border-radius: 50%; background: var(--c); left: 0; top: 2cqw; }
+  .t-poster .shapes i:nth-child(2) { width: 21cqw; height: 21cqw; background: var(--c2); left: 25cqw; top: 9cqw; transform: rotate(15deg); }
+  .t-poster .shapes i:nth-child(3) { width: 24cqw; height: 24cqw; border-radius: 50%; border: 3cqw solid var(--c); left: 52cqw; top: 0; }
+  .t-poster .dates { font-weight: 900; color: var(--c2); font-family: system-ui, sans-serif; }
+  .t-poster .spons { margin-top: auto; display: grid; grid-template-columns: repeat(7, 1fr); gap: 1cqw; }
+  .t-poster .spons i { height: 4.5cqw; background: color-mix(in srgb, currentColor 25%, transparent); border-radius: .6cqw; }
+  .t-poster .lg { position: absolute; right: var(--pad); top: var(--pad); width: calc(10cqw * var(--ls)); height: calc(10cqw * var(--ls)); font-size: calc(5cqw * var(--ls)); }
+
+  /* etichetta vino */
+  .t-label .in { align-items: center; justify-content: center; }
+  .t-label .lab { border: 1cqw double var(--c2); padding: 6cqw 5cqw; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2.4cqw; text-align: center; }
+  .t-label .lg { background: transparent; color: var(--c2); border: .6cqw solid var(--c2); }
+  .t-label .motto { font-style: italic; letter-spacing: .15em; font-size: 3.4cqw; color: var(--c2); }
+  .t-label svg { width: 40cqw; height: auto; }
+
+  /* sito immobiliare */
+  .t-website .in { padding: 0; gap: 0; }
+  .t-website .bro { display: flex; align-items: center; gap: 1cqw; background: #dcd6cc; padding: 1.4cqw 2cqw; font: 1.8cqw system-ui; color: #555; flex-shrink: 0; }
+  .t-website .bro i { width: 1.6cqw; height: 1.6cqw; border-radius: 50%; background: #f06; display: inline-block; }
+  .t-website .bro i:nth-child(2) { background: #fc0; } .t-website .bro i:nth-child(3) { background: #3c3; }
+  .t-website .bro span { margin-left: 2cqw; background: #fff; border-radius: 99px; padding: .3cqw 3cqw; }
+  .t-website .nav { display: flex; align-items: center; gap: 2cqw; padding: 2cqw var(--pad); font-size: 2.6cqw; }
+  .t-website .nav .lg { width: calc(5cqw * var(--ls)); height: calc(5cqw * var(--ls)); font-size: calc(2.6cqw * var(--ls)); }
+  .t-website .nav span { margin-left: auto; opacity: .7; }
+  .t-website .hero { display: grid; grid-template-columns: 1.1fr 1fr; gap: 3cqw; padding: 1cqw var(--pad); align-items: center; flex: 1; }
+  .t-website .cta { display: inline-block; margin-top: 2cqw; background: var(--c2); color: #111; padding: .6em 1.2em; border-radius: 1cqw; font-weight: 800; font-family: system-ui, sans-serif; }
+  .t-website .himg { height: 26cqw; border-radius: 1.5cqw; background: linear-gradient(160deg, #a5d8ff, #ffe8a3); display: grid; place-items: center; font-size: 12cqw; position: relative; }
+  .t-website .himg small { position: absolute; bottom: 1.5cqw; font: 700 2cqw system-ui; color: #333; background: rgba(255,255,255,.8); padding: .3cqw 1.5cqw; border-radius: 99px; }
+  .t-website .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2cqw; padding: 2cqw var(--pad) 4cqw; }
+  .t-website .cards i { height: 8cqw; border-radius: 1cqw; background: color-mix(in srgb, var(--c) 18%, var(--pbg)); display: grid; place-items: center; font-style: normal; font-size: 4.5cqw; }
+  .t-website .pop { position: absolute; left: 50%; top: 52%; transform: translate(-50%,-50%); background: #fff; color: #111; border: .5cqw solid var(--c2); border-radius: 2cqw; padding: 3cqw 6cqw; text-align: center; box-shadow: 0 0 0 100cqw rgba(0,0,0,.35); z-index: 4; font-family: system-ui, sans-serif; }
+  .t-website .pop b { display: block; font-size: 5cqw; color: var(--c); }
+  .t-website .pop small { font-size: 2.2cqw; }
+  .t-website .pop span { position: absolute; right: 1.5cqw; top: .6cqw; font-size: 2.4cqw; }
+
+  /* post palestra */
+  .t-social .in { background: var(--c); color: #fff; justify-content: center; }
+  .t-social.dark .in { background: color-mix(in srgb, var(--c) 40%, #000); }
+  .t-social.grad .in { background: linear-gradient(150deg, var(--c), var(--c2)); }
+  .t-social .ttl, .art.dark.t-social .ttl { color: #fff; text-transform: uppercase; }
+  .t-social .lg { position: absolute; left: var(--pad); top: var(--pad); width: auto; height: auto; padding: 1cqw 2.4cqw; border-radius: 99px; background: #fff; color: var(--c); font-size: calc(3.4cqw * var(--ls)); }
+  .t-social .musc { position: absolute; right: 4cqw; bottom: 6cqw; font-size: 30cqw; line-height: 1; }
+  .t-social .nopain { position: absolute; left: -5cqw; right: -5cqw; bottom: 26cqw; background: var(--yellow, #ffd43b); color: #111; font: 900 6.5cqw/1 Impact, "Arial Black", sans-serif; text-align: center; padding: 2cqw 0; transform: rotate(-6deg); z-index: 2; }
+  .t-social .smallico { position: absolute; right: 6cqw; bottom: 6cqw; font-size: 12cqw; }
+
+  /* segnaletica museo */
+  .t-signage .sg { display: flex; align-items: center; justify-content: space-between; gap: 2cqw; background: var(--c); color: #fff; padding: 1.6cqw 3cqw; border-radius: 1cqw; font-size: 4cqw; font-weight: 700; }
+  .t-signage .sg small { display: block; font-size: 2.4cqw; font-weight: 400; opacity: .85; }
+  .t-signage .sg .ar { font-family: system-ui, sans-serif; font-weight: 900; line-height: 1; }
+  .t-signage .sg.wc { background: var(--c2); color: #111; font-size: 5.4cqw; }
+  .t-signage .lg { width: calc(7cqw * var(--ls)); height: calc(7cqw * var(--ls)); font-size: calc(3.6cqw * var(--ls)); }
+
+  @media (max-width: 560px) {
+    body { padding: 12px; }
+    .stats { grid-template-columns: repeat(2, 1fr); }
+    .stats .stat:last-child { grid-column: span 2; }
+    .brief-head { grid-template-columns: 64px 1fr 88px; gap: 10px; }
+    .portrait { width: 64px; height: 64px; }
+    .thumb { width: 88px; height: 96px; }
+    .thumb-art { width: calc(60px * min(1, var(--r))); }
+    .client { font-size: 1.2rem; }
+    .meters, .fee-row { grid-template-columns: 1fr; }
+    .actions { grid-template-columns: 1fr 1fr; }
+    .actions .rev { grid-column: span 2; }
+    .strip { height: 400px; }
+    .hd { width: 40px; height: 40px; }
+    .msg { max-width: 98%; gap: 9px; }
+    .balloon { font-size: .95rem; }
+    .modal .btns { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>Ultima <span>Revisione!</span></h1>
+    <p class="sub">La bozza è consegnata. Ancora un ritocco… o incassi adesso?</p>
+  </header>
+
+  <section class="stats">
+    <div class="stat card"><div class="lbl">Progetto</div><div class="val" id="round">1/5</div></div>
+    <div class="stat card"><div class="lbl">Revisioni</div><div class="val" id="revs">0</div></div>
+    <div class="stat card earn"><div class="lbl">Incassato</div><div class="val" id="bank">0 €</div></div>
+    <div class="stat card"><div class="lbl">Spese fisse</div><div class="val" id="costs">5.000 €</div></div>
+    <div class="stat card"><div class="lbl">Record</div><div class="val" id="best">0 €</div></div>
+  </section>
+
+  <section class="brief card" id="brief">
+    <div class="brief-head">
+      <div class="portrait" id="portrait"></div>
+      <div>
+        <div class="client" id="client"></div>
+        <div class="who-line" id="who"></div>
+        <div class="job" id="job"></div>
+        <div class="temper" id="temper"></div>
+      </div>
+      <button class="thumb" id="thumb" title="Guarda il progetto">
+        <div class="thumb-art" id="thumbArt"></div>
+        <span class="tlbl">👁️ Anteprima</span>
+      </button>
+    </div>
+    <div class="meters">
+      <div class="meter">
+        <div class="top"><span>Qualità del progetto</span><b id="qTxt">0</b></div>
+        <div class="bar"><i id="qBar"></i></div>
+      </div>
+      <div class="meter">
+        <div class="top"><span>Rischio che il cliente molli</span><b id="rTxt">0%</b></div>
+        <div class="bar"><i id="rBar"></i></div>
+      </div>
+    </div>
+    <div class="fee-row">
+      <div class="fee win">Se consegni ora incassi <b id="fee">0 €</b></div>
+      <div class="fee lose">Se il cliente molla perdi <b id="loss">0 €</b></div>
+    </div>
+  </section>
+
+  <section class="strip card" id="log" aria-live="polite"></section>
+
+  <section class="actions">
+    <button class="rev" id="revBtn">✏️ Un'altra revisione</button>
+    <button class="peek" id="peekBtn">👁️ Anteprima</button>
+    <button class="ship" id="shipBtn">📦 Consegna…</button>
+  </section>
+  <div class="keys">Tastiera: Spazio = revisione · A = anteprima · C = consegna</div>
+
+  <details class="card">
+    <summary>Come si gioca</summary>
+    <ul>
+      <li>Cinque clienti, un progetto ciascuno. Parti sempre da una bozza già consegnata.</li>
+      <li>Ogni revisione segue una richiesta del cliente: il progetto cambia davvero, e puoi guardarlo quando vuoi con <b>Anteprima</b>.</li>
+      <li>Ogni revisione alza la qualità di un valore casuale e quindi il compenso. Sotto i 20 punti il lavoro sembra ancora una bozza; sopra i 45 compaiono le rifiniture, sopra gli 80 il sigillo d'oro.</li>
+      <li>Ma ogni revisione consuma la pazienza del cliente: c'è la probabilità mostrata che si stufi e butti via tutto. In quel caso il progetto vale zero. Guarda la sua faccia: ti dice quanto è vicino al limite.</li>
+      <li>Prima di consegnare vedi sempre il lavoro finito. Alla fine dell'anno devi aver coperto le spese fisse.</li>
+    </ul>
+  </details>
+</main>
+
+<!-- Anteprima -->
+<div class="overlay" id="pv">
+  <div class="modal wide card">
+    <h2 id="pvTitle">Anteprima</h2>
+    <div class="pv-info" id="pvInfo"></div>
+    <div class="pv-wrap"><div class="pv-art" id="pvArt"></div></div>
+    <p id="pvText"></p>
+    <div class="btns">
+      <button class="ghost" id="pvBack">← Torna al lavoro</button>
+      <button class="ship" id="pvShip">📦 Consegna e fattura</button>
+    </div>
+  </div>
+</div>
+
+<!-- Esito -->
+<div class="overlay" id="overlay">
+  <div class="modal card">
+    <h2 id="mTitle"></h2>
+    <div class="big" id="mBig"></div>
+    <div id="mArt"></div>
+    <p id="mText"></p>
+    <div id="mExtra"></div>
+    <button class="rev one" id="mBtn"></button>
+  </div>
+</div>
+
+<script>
+(() => {
+  const ROUNDS = 5;
+  const RATE = 100;
+  const COSTS = 5000;
+
+  /* ---------------- personaggi ---------------- */
+  const ME = { name: "Io · designer", look: { skin: "#f5d0b5", hair: "#5a3825", style: "long", shirt: "#7048e8", bg: "#e5dbff", acc: ["glasses", "pencil"] } };
+
+  const fl = k => p => p.f.add(k);
+
+  const CLIENTS = [
+    { name: "Pizzeria Da Totò", who: "Totò", job: "Nuovo menù della pizzeria", type: "menu", base: 0.06, step: 0.07, temper: "Alla mano",
+      look: { skin: "#f1c27d", hair: "#3a3a3a", style: "bald", shirt: "#ffffff", bg: "#ffd9c9", acc: ["chef", "mustache", "scarf"] },
+      pal: { c: "#c0392b", c2: "#2e7d4f", font: "serif" }, logo: "T",
+      slogan: "La pizza come la faceva il nonno",
+      hi: "Buongiorno! Mi serve un menù nuovo: quello vecchio ha ancora la pizza «Mondiali 2006». Voglio una cosa calda, di famiglia, che a guardarla venga fame.",
+      draft: "Ecco la prima bozza! Ho usato un rosso pomodoro e un carattere con le grazie, che ricorda le vecchie insegne di bottega. Le pizze sono in un elenco semplice, con i prezzi allineati a destra per leggerli al volo.",
+      react: "Mmh, profuma già di forno! Lasciami guardare con calma… intanto qualche ritocco lo facciamo?",
+      ok: "Bellissimo! Lo stampo e lo appendo accanto al forno. Pizza offerta, quando vuoi!",
+      ko: "Sa che c'è? Il menù me lo scrive mio cugino col pennarello, come prima. Arrivederci!",
+      reqs: [
+        { t: "Mia moglie Rosaria insiste: la Margherita deve stare in cima. È la regina della casa!", r: "Ho spostato la Margherita in cima alla lista e le ho messo una piccola corona 👑, così si capisce subito che è la pizza della casa. Già che c'ero ho ricontrollato l'allineamento dei prezzi.", f: fl("crown") },
+        { t: "Il rosso non mi convince. Deve essere più… pomodoro. San Marzano, hai presente?", r: "Ho scaldato il rosso verso un pomodoro maturo, più saturo e meno «segnale stradale». L'ho provato anche su carta porosa, quella dei menù da tavolo: tiene benissimo.", f: p => { p.c = "#e8401c"; } },
+        { t: "Ci metti la foto di mio nonno Salvo? Ha aperto il forno nel '58: senza di lui niente pizzeria.", r: "Che bella storia! Ho inserito la foto del nonno in un riquadro color seppia con una didascalia breve. Racconta la tradizione senza rubare spazio alle pizze.", f: fl("nonno") },
+        { t: "Si può scrivere tutto più grande? I miei clienti fissi non hanno più vent'anni…", r: "Ho ingrandito titolo e voci e ridotto i margini per recuperare spazio. Ho fatto la prova a un braccio di distanza, con la luce bassa del locale: si legge senza occhiali.", f: p => { p.ts *= 1.15; p.pad = "tight"; } }
+      ] },
+    { name: "Studio Legale Rossi & Figli", who: "Avv. Rossi", job: "Restyling del logo", type: "logo", base: 0.08, step: 0.09, temper: "Formale",
+      look: { skin: "#f3cfb3", hair: "#b8b8b8", style: "bald", shirt: "#2b3a55", bg: "#dfe5f2", acc: ["glasses", "tie"] },
+      pal: { c: "#22305a", c2: "#b08d57", font: "serif" }, logo: "⚖",
+      slogan: "Il diritto, di famiglia",
+      hi: "Buongiorno. Il nostro logo ha trent'anni e si vede. Ci serve qualcosa di serio, affidabile… ma che non sembri una lapide.",
+      draft: "Ecco una prima proposta: blu notte e oro antico, un simbolo semplice e il nome in un carattere classico. L'idea è comunicare esperienza senza rinunciare a un'aria contemporanea.",
+      react: "Interessante. Devo sentire anche mio padre e mio fratello, ma qualche osservazione ce l'ho già.",
+      ok: "Approvato all'unanimità, cosa rarissima in famiglia. Ci mandi pure la parcella… pardon, la fattura.",
+      ko: "Ho convocato una riunione di famiglia sul logo. È finita male. Il progetto è sospeso a tempo indeterminato.",
+      reqs: [
+        { t: "Mio padre vuole che si veda che lo studio esiste dal 1962. Per lui è una questione d'onore.", r: "Ho aggiunto «dal 1962» accanto alla dicitura, in maiuscoletto spaziato. È discreto ma si nota, e dà subito l'idea di uno studio con una storia lunga.", f: fl("since") },
+        { t: "Questa bilancia la usano tutti gli avvocati d'Italia. Non è un po' banale?", r: "Ha ragione, la bilancia è un cliché. L'ho sostituita con un monogramma «R&F»: è più riconoscibile ed è vostro, non di tutta la categoria.", f: p => { p.f.add("mono"); } },
+        { t: "«& Figli» è troppo piccolo. Mio fratello si offende, e a Natale poi lo sento io.", r: "Ho portato «& Figli» alla stessa dimensione di «Rossi» e stretto un po' la spaziatura, così il nome diventa un blocco unico. La pace in famiglia è salva.", f: fl("figli") },
+        { t: "Si può renderlo più solido? Tipo… marmo, colonne, autorevolezza.", r: "Ho scelto un carattere ispirato alle iscrizioni romane e un fondo blu notte profondissimo. Trasmette autorevolezza senza sembrare un monumento.", f: p => { p.font = "classic"; p.bg = "dark"; } }
+      ] },
+    { name: "Startup GreenChain", who: "Giulia, CEO", job: "Slide d'apertura del pitch", type: "slide", base: 0.04, step: 0.12, temper: "Frenetica",
+      look: { skin: "#e0ac83", hair: "#1e1e1e", style: "bob", shirt: "#36b37e", bg: "#d8f5e6", acc: ["headset", "hoodie"] },
+      pal: { c: "#2f9e5f", c2: "#0b7285", font: "sans" }, logo: "G",
+      slogan: "Dal campo alla tavola, senza segreti",
+      hi: "Ciao! Venerdì abbiamo il pitch con tre fondi d'investimento. Ci serve la slide d'apertura: deve dire «innovazione» e «crescita» in mezzo secondo.",
+      draft: "Ecco la slide! Titolo grande a sinistra, un grafico di crescita pulito a destra e il verde come colore guida, per richiamare la filiera agricola. Un messaggio solo, leggibile anche dal fondo della sala.",
+      react: "Wow, ok, ci siamo quasi. Ho girato il link al team e… stanno arrivando commenti.",
+      ok: "Perfetta! La proiettiamo venerdì. Se chiudiamo il round ti paghiamo in azioni. Scherzo. Forse.",
+      ko: "Abbiamo fatto un pivot: niente più blockchain, ora facciamo un'app per gatti. La slide non serve più.",
+      reqs: [
+        { t: "Gli investitori amano i grafici che salgono. Ce ne servono di più: più barre, più in alto!", r: "Ho portato il grafico a sette barre con una crescita più evidente e ho evidenziato l'ultimo trimestre. Solo un consiglio: i numeri devono essere veri, gli investitori controllano.", f: fl("bars") },
+        { t: "Mettiamo «AI» da qualche parte? Ovunque, magari. È il 2026!", r: "Ho aggiunto l'AI nel sottotitolo e un'etichetta «AI-powered» discreta. Messa ovunque perderebbe forza: così si nota, ma non sembra disperato.", f: fl("ai") },
+        { t: "Il verde è troppo ecologista. Vogliamo sembrare tech, non un mercatino bio.", r: "Ho spostato la palette verso un viola elettrico su fondo scuro, molto «tech». Ho tenuto un accento verde per non perdere il legame con l'agricoltura.", f: p => { p.c = "#7b6cf6"; p.c2 = "#38d996"; p.bg = "dark"; } },
+        { t: "Il nostro advisor dice che la slide è troppo piena. Però non togliere niente, eh.", r: "Ho lavorato sulla gerarchia invece che sui contenuti: titolo più compatto, più spazio tra i blocchi, tutto allineato a una griglia. C'è ancora tutto, ma respira.", f: p => { p.pad = "airy"; p.ts *= 0.9; } }
+      ] },
+    { name: "Assessorato alla Cultura", who: "Dott.ssa Lo Bianco", job: "Manifesto del Festival delle Arti", type: "poster", base: 0.03, step: 0.05, temper: "Paziente (e lenta)",
+      look: { skin: "#f2d0b8", hair: "#9a4a2a", style: "bob", shirt: "#0b7285", bg: "#eadcff", acc: ["necklace"] },
+      pal: { c: "#e4572e", c2: "#3b5bdb", font: "display" }, logo: "🏛",
+      slogan: "Una città che si accende",
+      hi: "Buongiorno. Ci serve il manifesto del Festival delle Arti di luglio. Deve piacere ai giovani, agli anziani, alla giunta e possibilmente anche all'opposizione.",
+      draft: "Ecco la prima bozza: forme geometriche colorate che si incastrano come una città in festa, un titolo forte e le informazioni pratiche in basso. Funziona sia sui muri che sui social.",
+      react: "Bello. Lo porto in giunta giovedì. Nel frattempo raccolgo le osservazioni degli uffici…",
+      ok: "La giunta l'ha approvato senza emendamenti. Non succedeva dal 1998! Proceda pure con la stampa.",
+      ko: "Il bando è stato annullato per un vizio di forma. Mi dispiace, il manifesto resta nel cassetto.",
+      reqs: [
+        { t: "La giunta vuole i loghi di tutti gli sponsor. Sono quattordici. Tutti uguali, che nessuno si offenda.", r: "Ho creato una fascia in basso con i 14 loghi alla stessa altezza «ottica», non solo alla stessa larghezza: così nessuno sembra più importante degli altri.", f: fl("spons") },
+        { t: "Le date vanno messe più in evidenza: l'anno scorso metà del pubblico è arrivata il giorno sbagliato.", r: "Ho ingrandito le date e le ho messe subito sotto il titolo, in grassetto e nel colore d'accento. Ora sono la seconda cosa che si legge, dopo il nome del festival.", f: fl("dates") },
+        { t: "L'assessore preferisce il giallo. Dice che porta bene.", r: "Ho introdotto un giallo caldo, quasi siciliano, nelle forme e nello sfondo. Per i testi ho tenuto un tono più scuro: giallo su bianco non si leggerebbe.", f: p => { p.c2 = "#f2b705"; p.grad = true; } },
+        { t: "Più cultura! Si può mettere qualcosa di classico, tipo un capitello?", r: "Invece del capitello ho scelto un carattere con grazie di gusto classico per il titolo, accanto alle forme geometriche: un dialogo tra antico e contemporaneo, che poi è lo spirito del festival.", f: p => { p.font = "classic"; } }
+      ] },
+    { name: "Cantina Etna Rosso", who: "Don Saro", job: "Etichetta della nuova annata", type: "label", base: 0.05, step: 0.08, temper: "Esigente",
+      look: { skin: "#d9a066", hair: "#4a3b32", style: "curly", shirt: "#7b1e3a", bg: "#f6d5de", acc: ["mustache"] },
+      pal: { c: "#6d1a36", c2: "#9c7a3c", font: "serif" }, logo: "S",
+      slogan: "Nato dal fuoco",
+      hi: "Salve. Quest'anno la vendemmia è stata eccezionale e l'etichetta deve esserlo pure. Elegante, siciliana, che dallo scaffale ti chiami per nome.",
+      draft: "Ecco l'etichetta: bordeaux profondo, una cornice sottile e il nome del vino al centro in un carattere classico. Ho pensato a una carta ruvida, che si apprezza anche al tatto.",
+      react: "Mmh. Deve decantare, come il vino. Però qualche idea già ce l'ho…",
+      ok: "Questa è un'etichetta che si fa ricordare. Le mando una cassa, oltre al pagamento!",
+      ko: "No, no. Torniamo all'etichetta di mio nonno, che non ha mai sbagliato un'annata. Saluti.",
+      reqs: [
+        { t: "Quest'etichetta deve sapere di vulcano. Ci mettiamo l'Etna?", r: "Ho disegnato un profilo stilizzato dell'Etna con un filo di fumo, in tratto sottile. Ricorda il territorio senza diventare una cartolina.", f: fl("volcano") },
+        { t: "Mio nonno vuole un motto in latino. Dice che fa nobile.", r: "Ho proposto «Ex igne vinum», cioè «dal fuoco, il vino», in maiuscoletto sotto il nome. Breve, solenne, e collegato al vulcano.", f: fl("latin") },
+        { t: "Più oro. Il vino è importante: deve sembrare importante.", r: "Ho portato cornice e dettagli in un oro caldo, pensato per la stampa a caldo. Ho usato l'oro solo nei dettagli: troppo oro fa sembrare l'etichetta un pacco di Natale.", f: p => { p.c2 = "#c9a227"; } },
+        { t: "Il sommelier dice che sullo scaffale il nome si legge male.", r: "Ho ingrandito il nome del vino e aumentato il contrasto con il fondo. L'ho provato su una foto di uno scaffale vero, a tre metri: ora si distingue dalle altre bottiglie.", f: p => { p.ts *= 1.2; } }
+      ] },
+    { name: "Immobiliare Prestige", who: "Ivan", job: "Homepage del sito vetrina", type: "website", base: 0.10, step: 0.10, temper: "Impaziente",
+      look: { skin: "#f0c8a0", hair: "#d8b46a", style: "slick", shirt: "#343a40", bg: "#dbe7f3", acc: ["sunglasses", "tie"] },
+      pal: { c: "#14213d", c2: "#fca311", font: "sans" }, logo: "P",
+      slogan: "Il tuo prossimo capitolo",
+      hi: "Ciao, sono Ivan. Il sito deve vendere case, non spiegarle. Impatto, lusso e telefono che squilla. Ah, e mi serviva ieri.",
+      draft: "Ecco la homepage: una grande immagine d'apertura, il messaggio in primo piano e un pulsante «Contattaci» ben visibile. Sotto, le case in evidenza in tre schede ordinate.",
+      react: "Ok, ok, buono. Ma posso mandarti un paio di vocali?",
+      ok: "Top. Mettiamolo online subito, ho già tre appuntamenti da fissare.",
+      ko: "Basta, ho trovato un template a 19 euro che fa tutto da solo. Ciao!",
+      reqs: [
+        { t: "In homepage ci vuole un carosello con tutte le nostre 40 case.", r: "Ho inserito un carosello nell'immagine principale, ma con le 5 case migliori e un link «vedi tutte». Quaranta foto di fila farebbero scappare i visitatori prima della terza.", f: fl("car") },
+        { t: "Il pulsante «Contattaci» deve essere più grande. Molto più grande.", r: "Ho raddoppiato il pulsante e gli ho dato il colore più acceso della pagina. Ora è impossibile non vederlo, anche da telefono con il pollice.", f: fl("cta") },
+        { t: "Facciamo comparire un pop-up con l'offerta appena si entra nel sito!", r: "Ho aggiunto il pop-up con l'offerta. Ti consiglio però di farlo comparire dopo qualche secondo: se arriva subito, la gente lo chiude senza leggerlo.", f: fl("popup") },
+        { t: "Più lusso. Pensa a Montecarlo.", r: "Ho portato tutto su un blu notte profondo, con dettagli dorati e un titolo con grazie sottili. Lusso vero è anche togliere: ho lasciato più aria intorno alle foto.", f: p => { p.bg = "dark"; p.c2 = "#d4af37"; p.font = "serif"; } }
+      ] },
+    { name: "Palestra IronFit", who: "Coach Mimmo", job: "Post social di settembre", type: "social", base: 0.07, step: 0.08, temper: "Energico",
+      look: { skin: "#c68642", hair: "#1e1e1e", style: "short", shirt: "#ff6b1a", bg: "#ffe3bf", acc: ["headband"] },
+      pal: { c: "#ff5a1f", c2: "#c2255c", font: "display" }, logo: "IronFit",
+      slogan: "Il divano può aspettare",
+      hi: "Ehi campione! Settembre è il mese dei buoni propositi: tutti tornano dalle vacanze con due chili in più. Mi serve un post che li tiri giù dal divano!",
+      draft: "Ecco il post! Arancione energico, testo enorme e diretto, leggibile anche nella piccola anteprima del feed. L'obiettivo è fermare il pollice di chi scorre.",
+      react: "Grande! Lo faccio vedere ai ragazzi della sala pesi e ti faccio sapere. Anzi, ti dico già qualcosa.",
+      ok: "SPACCA! Lo pubblichiamo stasera. Ti regalo tre mesi di abbonamento, così ti alleni pure tu!",
+      ko: "Fermi tutti: il post me lo faccio da solo con Canva, tra una serie e l'altra. Ciao!",
+      reqs: [
+        { t: "Più muscoli! Guardando il post si deve sentire la fatica!", r: "Ho messo un bicipite gigante, tagliato dal bordo, come se uscisse dallo schermo. È esagerato apposta: sui social l'ironia funziona meglio della serietà.", f: fl("musc") },
+        { t: "Scriviamo NO PAIN NO GAIN. In grande. In inglese fa più figo.", r: "Ho aggiunto una fascia gialla inclinata con «NO PAIN NO GAIN», come un nastro da cantiere. Dà movimento e non copre il messaggio principale.", f: fl("nopain") },
+        { t: "Ci vuole una fiamma. Il fuoco motiva!", r: "Ho aggiunto un paio di fiamme 🔥 vicino al titolo, come accento. Ne ho messe poche: se bruciava tutto, il post sembrava un allarme antincendio.", f: fl("fire") },
+        { t: "Si può fare più energico? Tipo una lattina di energy drink.", r: "Ho trasformato il fondo in una sfumatura dall'arancione al magenta, molto accesa. Ho controllato il contrasto: il testo bianco si legge ancora benissimo.", f: p => { p.grad = true; p.c2 = "#d6336c"; } }
+      ] },
+    { name: "Museo Civico", who: "Prof.ssa Ferrante", job: "Segnaletica delle sale", type: "signage", base: 0.04, step: 0.06, temper: "Riflessiva",
+      look: { skin: "#f6d7c3", hair: "#e8e8e8", style: "bun", shirt: "#8c2f39", bg: "#e4efd9", acc: ["glasses", "necklace"] },
+      pal: { c: "#2d4739", c2: "#e9b44c", font: "sans" }, logo: "M",
+      slogan: "Perdersi è bello, ma non troppo",
+      hi: "Buongiorno. I nostri visitatori si perdono continuamente: l'altro giorno un signore è finito in magazzino. Ci serve una segnaletica chiara, sobria e rispettosa delle opere.",
+      draft: "Ecco la prima proposta: cartelli verde salvia con testi bianchi ad alto contrasto, frecce semplici e un ordine sempre uguale. Sono pensati per essere letti in movimento, anche da lontano.",
+      react: "Molto ordinata. La sottopongo al comitato scientifico, che avrà certamente qualche osservazione…",
+      ok: "Il comitato approva. Da oggi nessuno si perderà più in magazzino. Grazie!",
+      ko: "Il comitato ha deciso di rimandare tutto al prossimo anno, dopo il convegno. Il progetto è sospeso.",
+      reqs: [
+        { t: "Le frecce vanno ingrandite: i visitatori si perdono tra la sala 3 e la 4.", r: "Ho quasi raddoppiato le frecce e le ho rese più spesse. Ho fatto la prova camminando a passo normale: si capisce la direzione prima ancora di leggere il testo.", f: fl("arrows") },
+        { t: "Servono le traduzioni in inglese e tedesco. Abbiamo tantissimi turisti.", r: "Ho aggiunto inglese e tedesco sotto l'italiano, più piccoli e più chiari. La gerarchia resta: prima la lingua del museo, poi le traduzioni.", f: fl("lang") },
+        { t: "La toilette va segnalata meglio. È la domanda che ci fanno di più, più dei Caravaggio.", r: "Ho dato alla toilette un cartello con colore e icona dedicati, un po' più grande degli altri. Ammettiamolo: è l'informazione più cercata del museo.", f: fl("wc") },
+        { t: "Questo verde ricorda un ospedale. Si può fare più… museale?", r: "Ho cambiato il verde con un bordeaux profondo e dettagli ocra, colori che ricordano le sale storiche. I testi sono in un carattere con grazie leggere, elegante ma leggibile.", f: p => { p.c = "#6b2737"; p.c2 = "#e0b46a"; p.font = "serif"; } }
+      ] }
+  ];
+
+  /* Richieste valide per tutti i clienti */
+  const GENERIC = [
+    { t: "Il logo si può fare più grande? Da lontano non si vede.", r: "Ho ingrandito il logo di circa un terzo e ridotto un po' gli elementi vicini, così non si pestano i piedi. Ho fatto una prova a tre metri: adesso si riconosce.", f: p => { p.ls *= 1.3; } },
+    { t: "Mi piace, ma proviamo in blu? Il blu ispira fiducia.", r: "Ho fatto la variante in blu, scegliendo un blu profondo e non quello «da banca». Tengo da parte la versione precedente, se vuoi confrontarle.", f: p => { p.c = "#1f4e9c"; } },
+    { t: "Mia nipote dice che il carattere è vecchio.", r: "Ho sostituito il carattere con un bastoni pulito e contemporaneo e aumentato un filo la spaziatura tra le lettere. Tua nipote dovrebbe approvare.", f: p => { p.font = "sans"; } },
+    { t: "Si può rendere più… moderno? Non so spiegare. Più fresco.", r: "Ho semplificato: meno decorazioni, colori più puliti e più aria intorno al titolo. Spesso «moderno» vuol dire togliere, non aggiungere.", f: p => { p.pad = "airy"; p.grad = false; p.f.delete("spark"); } },
+    { t: "C'è troppo spazio bianco: sembra che manchi qualcosa.", r: "Ho riempito compattando i margini e allargando gli elementi. Però ti consiglio di lasciare un po' di respiro: lo spazio bianco è ciò che fa sembrare un lavoro curato.", f: p => { p.pad = "tight"; } },
+    { t: "Il concorrente ha fatto una cosa simile, ma secondo me meglio.", r: "Ho studiato il loro lavoro: hanno un contrasto più forte e una gerarchia più chiara. Ne ho preso lo spirito, senza copiare, e ho reso il titolo più deciso.", f: p => { p.ts *= 1.12; } },
+    { t: "Rimettiamo la versione di prima… però diversa.", r: "Sono ripartita dalla struttura precedente, come chiedevi, e ho cambiato la palette con un tono più caldo. Hai la struttura che ti piaceva con un'atmosfera nuova.", f: p => { p.c = pick(["#b5541c", "#8a4f7d", "#a23e48", "#2a7f62"]); } },
+    { t: "Deve «spaccare» di più!", r: "Ho alzato il contrasto, ingrandito il titolo e acceso il colore secondario. Ora si fa notare anche in mezzo a mille altre cose.", f: p => { p.ts *= 1.15; p.c2 = "#ff2e63"; } },
+    { t: "Il capo l'ha visto e vuole più colore.", r: "Ho aggiunto una sfumatura di sfondo con il secondo colore. Non ho esagerato: il colore in più deve guidare l'occhio verso le informazioni importanti, non distrarre.", f: p => { p.grad = true; } },
+    { t: "Aggiungiamo il numero di telefono. Anzi, anche il fax.", r: "Ho messo telefono e fax in una fascia in basso, più piccoli per non rubare la scena. Sul fax però ti chiedo: sei sicuro? È l'unica cosa che ci riporta agli anni '90.", f: p => { p.f.add("phone"); p.f.add("fax"); } },
+    { t: "Si può fare tutto ma più piccolo?", r: "Ho ridotto titolo e logo di circa il 15%, mantenendo le proporzioni. C'è più aria, ma attenzione: oltre questo la leggibilità comincia a soffrire.", f: p => { p.ts *= 0.85; p.ls *= 0.85; } },
+    { t: "Mettiamo una foto con delle persone sorridenti? Dà calore.", r: "Ho inserito una foto con persone sorridenti, scegliendone una che sembri il meno possibile «da catalogo», con luce naturale. Ho regolato i toni per farla stare con la palette.", f: fl("stock") },
+    { t: "Possiamo aggiungere un QR code? Ce l'hanno tutti.", r: "Ho messo un QR code in un angolo, collegato al vostro sito. Piccolo, ma abbastanza grande da essere letto da un metro di distanza.", f: fl("qr") },
+    { t: "Ci starebbe bene un bollino tipo «NOVITÀ!», no?", r: "Ho aggiunto un bollino tondo con «Novità!», leggermente ruotato come un adesivo. Così sembra un'aggiunta allegra e non un errore di impaginazione.", f: fl("badge") },
+    { t: "E se lo facessimo su sfondo scuro? Mi sembra più elegante.", r: "Ho invertito tutto su fondo scuro e schiarito i testi per tenere il contrasto. Invece del nero puro ho usato un blu profondissimo, più raffinato.", f: p => { p.bg = "dark"; } },
+    { t: "Il titolo si può fare con una scritta più… a mano? Più calda.", r: "Ho provato un corsivo calligrafico solo per il titolo e lasciato il resto in un carattere semplice. Così è più caldo ma resta leggibile.", f: p => { p.font = "script"; } },
+    { t: "Ci vorrebbe uno slogan. Qualcosa di d'effetto.", r: "Ho scritto tre possibili slogan e ho inserito il più corto sotto il titolo. Gli altri due te li giro per email, nel caso cambiassi idea.", f: fl("slogan") },
+    { t: "È tutto un po' troppo serio. Si può renderlo più simpatico?", r: "Ho arrotondato gli angoli e aggiunto qualche scintilla ✨ qua e là. Piccoli tocchi che sorridono, senza trasformarlo in un biglietto d'auguri.", f: p => { p.round = true; p.f.add("spark"); } },
+    { t: "Mio cognato, che fa le foto ai matrimoni, dice che va bene ma «manca qualcosa».", r: "Ho ascoltato il suggerimento e ho lavorato sui dettagli: ho bilanciato meglio i pesi e dato più forza al logo. Quel «qualcosa» spesso è proprio l'equilibrio.", f: p => { p.ls *= 1.1; } },
+    { t: "Lo vorrei più elegante. Tipo rivista di moda.", r: "Ho scelto un carattere con grazie sottili e contrastate, tipico delle riviste di moda, e ho ridotto un po' il titolo per dargli più classe.", f: p => { p.font = "serif"; p.ts *= 0.95; } }
+  ];
+
+  const IDEAS = [
+    "💡 E mentre ci lavoravo mi è venuta un'idea: ho rifatto la griglia di base, ora ogni elemento è allineato e tutto sembra più solido.",
+    "💡 Già che c'ero ho sistemato la spaziatura del titolo lettera per lettera: è un dettaglio che non si vede, ma si sente.",
+    "💡 Ho anche stampato una prova: correggendo un paio di toni, la resa è migliorata parecchio.",
+    "💡 E ho avuto un'intuizione sul ritmo dei testi: ho ricalibrato tutte le dimensioni su una scala armonica. Ora è tutto più coerente."
+  ];
+  const ANGRY = [
+    "Sa cosa? Lasciamo perdere. Lo fa mio cugino.",
+    "Basta, ci ho ripensato: niente progetto.",
+    "Troppe versioni, non ci capiamo più. Chiudiamo qui.",
+    "Il budget è stato spostato su altro. Mi spiace."
+  ];
+  const HAPPY = [
+    "Perfetto, è esattamente quello che avevo in mente. Mandi pure la fattura!",
+    "Ci piace un sacco. Pubblichiamo!"
+  ];
+  const BOOMS = ["SBAM!", "KRASH!", "BASTA!", "POW!"];
+
+  /* ---------------- personaggi SVG ---------------- */
+  let uid = 0;
+  const K = "#1a1a1a";
+  function person(L, mood) {
+    const id = "cp" + (uid++);
+    const S = `stroke="${K}" stroke-width="2.5" stroke-linejoin="round"`;
+    const a = L.acc || [];
+    const o = [];
+    o.push(`<svg viewBox="0 0 100 100" aria-hidden="true"><defs><clipPath id="${id}"><circle cx="50" cy="50" r="47"/></clipPath></defs>`);
+    o.push(`<circle cx="50" cy="50" r="47" fill="${L.bg}"/><g clip-path="url(#${id})">`);
+    // capelli dietro
+    if (L.style === "long") o.push(`<path d="M23 50 C20 20 40 15 50 16 C62 15 80 20 77 50 L80 90 L20 90Z" fill="${L.hair}" ${S}/>`);
+    if (L.style === "bob") o.push(`<path d="M24 50 C22 22 40 16 50 17 C62 16 78 22 76 50 L77 66 C70 68 66 66 64 62 L36 62 C34 66 30 68 23 66Z" fill="${L.hair}" ${S}/>`);
+    if (L.style === "bun") o.push(`<circle cx="50" cy="16" r="9" fill="${L.hair}" ${S}/>`);
+    // collo e corpo
+    o.push(`<rect x="44" y="64" width="12" height="16" fill="${L.skin}" ${S}/>`);
+    if (a.includes("hoodie")) o.push(`<path d="M30 80 Q50 66 70 80" fill="${L.shirt}" ${S}/>`);
+    o.push(`<path d="M12 106 C14 83 30 77 50 77 C70 77 86 83 88 106Z" fill="${L.shirt}" ${S}/>`);
+    if (a.includes("tie")) o.push(`<path d="M40 77 L50 85 L60 77" fill="#fff" ${S}/><path d="M47.5 84 L52.5 84 L55 90 L51 101 L49 101 L45 90Z" fill="#c92a2a" ${S}/>`);
+    if (a.includes("scarf")) o.push(`<path d="M38 77 Q50 85 62 77 L57 93 L50 85 L43 93Z" fill="#e03131" ${S}/>`);
+    if (a.includes("hoodie")) o.push(`<path d="M45 82 L45 94 M55 82 L55 94" stroke="#fff" stroke-width="2"/>`);
+    if (a.includes("necklace")) { for (let i = -3; i <= 3; i++) o.push(`<circle cx="${50 + i * 4.2}" cy="${80 + i * i * 0.55}" r="2" fill="#fff" stroke="${K}" stroke-width="1"/>`); }
+    // orecchie e viso
+    o.push(`<circle cx="27" cy="51" r="5" fill="${L.skin}" ${S}/><circle cx="73" cy="51" r="5" fill="${L.skin}" ${S}/>`);
+    o.push(`<ellipse cx="50" cy="48" rx="23" ry="25" fill="${L.skin}" ${S}/>`);
+    if (mood === "angry") o.push(`<ellipse cx="50" cy="50" rx="21" ry="22" fill="#ff3b30" opacity=".22"/>`);
+    o.push(`<ellipse cx="37" cy="57" rx="4" ry="2.4" fill="#ff7b7b" opacity=".45"/><ellipse cx="63" cy="57" rx="4" ry="2.4" fill="#ff7b7b" opacity=".45"/>`);
+    // occhi
+    if (mood === "happy") o.push(`<path d="M37 50 Q41 45 45 50 M55 50 Q59 45 63 50" fill="none" stroke="${K}" stroke-width="2.6" stroke-linecap="round"/>`);
+    else {
+      const r = mood === "angry" ? 2.6 : 3.2;
+      o.push(`<ellipse cx="41" cy="49" rx="${r}" ry="${r + .6}" fill="${K}"/><ellipse cx="59" cy="49" rx="${r}" ry="${r + .6}" fill="${K}"/><circle cx="42.2" cy="47.6" r="1" fill="#fff"/><circle cx="60.2" cy="47.6" r="1" fill="#fff"/>`);
+    }
+    // sopracciglia
+    const brows = {
+      happy: "M36 41 Q41 37 46 40 M54 40 Q59 37 64 41",
+      content: "M37 42 L45 41 M55 41 L63 42",
+      annoyed: "M36 40 L45 43 M55 43 L64 40",
+      angry: "M35 38 L46 44 M54 44 L65 38"
+    }[mood];
+    o.push(`<path d="${brows}" fill="none" stroke="${a.includes("sunglasses") ? "none" : K}" stroke-width="2.6" stroke-linecap="round"/>`);
+    // naso
+    o.push(`<path d="M50 51 Q53 55 49 56" fill="none" stroke="${K}" stroke-width="1.8" stroke-linecap="round"/>`);
+    // bocca
+    const mouth = {
+      happy: `<path d="M41 59 Q50 71 59 59 Z" fill="#7a2a2a" ${S}/>`,
+      content: `<path d="M43 60 Q50 65 57 60" fill="none" stroke="${K}" stroke-width="2.4" stroke-linecap="round"/>`,
+      annoyed: `<path d="M44 62.5 Q50 60 56 62.5" fill="none" stroke="${K}" stroke-width="2.4" stroke-linecap="round"/>`,
+      angry: `<path d="M41 66 Q50 55 59 66 Q50 69 41 66Z" fill="#5a1414" ${S}/>`
+    }[mood];
+    o.push(mouth);
+    if (a.includes("mustache")) o.push(`<path d="M41 57 C44 53 48 54 50 56 C52 54 56 53 59 57 C56 59 52 59 50 57.5 C48 59 44 59 41 57Z" fill="${L.style === "bald" ? "#3a3a3a" : L.hair}" ${S} stroke-width="1.5"/>`);
+    // capelli davanti
+    const FRONT = {
+      short: "M27 47 C25 26 38 19 52 20 C66 20 76 30 73 47 C71 39 67 34 61 32 C53 36 40 36 32 37 C29 40 28 43 27 47Z",
+      slick: "M27 46 C24 25 42 17 57 20 C70 23 77 33 73 46 C72 37 68 31 62 29 C53 30 41 27 34 32 C30 36 28 41 27 46Z",
+      bob: "M27 45 C27 28 39 21 50 21 C62 21 73 28 73 45 C66 36 58 31 50 31 C43 32 34 36 27 45Z",
+      long: "M27 46 C26 26 40 19 52 20 C66 20 75 30 73 46 C68 34 60 28 54 28 C50 34 38 38 27 46Z",
+      bun: "M27 45 C26 27 38 21 50 21 C63 21 74 28 73 45 C68 35 59 30 50 30 C41 30 32 35 27 45Z",
+      bald: "M27 53 C25 45 27 40 31 38 L32 51Z M73 53 C75 45 73 40 69 38 L68 51Z"
+    };
+    if (L.style === "curly") {
+      [[30, 39, 7.5], [35, 29, 9], [46, 23, 9.5], [58, 24, 9], [67, 31, 8.5], [71, 40, 6.5]].forEach(([x, y, r]) => o.push(`<circle cx="${x}" cy="${y}" r="${r}" fill="${L.hair}" ${S}/>`));
+    } else if (!a.includes("chef")) o.push(`<path d="${FRONT[L.style]}" fill="${L.hair}" ${S}/>`);
+    // accessori testa
+    if (a.includes("chef")) o.push(`<path d="M31 25 C22 23 23 10 33 11 C36 4 47 3 51 8 C57 3 69 5 68 12 C78 11 79 25 69 25Z" fill="#fff" ${S}/><rect x="30" y="22" width="40" height="9" rx="2" fill="#fff" ${S}/>`);
+    if (a.includes("glasses")) o.push(`<circle cx="41" cy="49" r="6.5" fill="rgba(255,255,255,.15)" stroke="${K}" stroke-width="2"/><circle cx="59" cy="49" r="6.5" fill="rgba(255,255,255,.15)" stroke="${K}" stroke-width="2"/><path d="M47.5 49 L52.5 49 M34.5 48 L28 46 M65.5 48 L72 46" stroke="${K}" stroke-width="2"/>`);
+    if (a.includes("sunglasses")) o.push(`<rect x="32" y="43" width="16" height="10" rx="4" fill="${K}"/><rect x="52" y="43" width="16" height="10" rx="4" fill="${K}"/><path d="M48 46 L52 46" stroke="${K}" stroke-width="2.5"/><path d="M35 46 L40 45" stroke="#fff" stroke-width="1.5" opacity=".6"/>`);
+    if (a.includes("headband")) o.push(`<rect x="26" y="31" width="48" height="7" rx="2" fill="#e03131" ${S}/>`);
+    if (a.includes("headset")) o.push(`<path d="M25 48 C23 15 77 15 75 48" fill="none" stroke="#333" stroke-width="4"/><rect x="20" y="43" width="8" height="13" rx="3" fill="#333"/><rect x="72" y="43" width="8" height="13" rx="3" fill="#333"/><path d="M24 55 Q27 66 41 64" fill="none" stroke="#333" stroke-width="2.4"/><circle cx="42" cy="64" r="2.6" fill="#333"/>`);
+    if (a.includes("pencil")) o.push(`<g transform="rotate(35 76 34)"><rect x="73.5" y="18" width="5" height="22" fill="#fcc419" ${S} stroke-width="1.5"/><path d="M73.5 40 L76 46 L78.5 40Z" fill="#f1d3a1" ${S} stroke-width="1.5"/><rect x="73.5" y="15" width="5" height="4" fill="#ff8787" ${S} stroke-width="1.5"/></g>`);
+    o.push(`</g><circle cx="50" cy="50" r="47" fill="none" stroke="${K}" stroke-width="3"/></svg>`);
+    return o.join("");
+  }
+
+  /* ---------------- anteprima del progetto ---------------- */
+  const FONTS = {
+    serif: "Georgia, 'Times New Roman', serif",
+    classic: "'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif",
+    sans: "'Helvetica Neue', Helvetica, Arial, sans-serif",
+    display: "Impact, 'Arial Black', 'Haettenschweiler', sans-serif",
+    script: "'Brush Script MT', 'Segoe Script', 'Snell Roundhand', cursive"
+  };
+  const AR = { menu: "3/4", logo: "4/3", slide: "16/9", poster: "3/4", label: "3/4", website: "16/10", social: "1/1", signage: "4/3" };
+  const TB = { menu: 8, logo: 8.5, slide: 6.5, poster: 10.5, label: 8, website: 4.8, social: 10, signage: 4.6 };
+  const ratio = t => { const [a, b] = AR[t].split("/").map(Number); return a / b; };
+
+  const TPL = {
+    menu: (F, sl) => {
+      let items = [["Marinara", "5,00"], ["Diavola", "7,50"], ["Margherita", "6,00"], ["Capricciosa", "8,50"], ["Speciale Totò", "10,00"]];
+      if (F.has("crown")) items = [items[2], ...items.filter((_, i) => i !== 2)];
+      return `<div class="row"><div class="lg">T</div><div><div class="ttl">Da Totò</div><div class="sm">Pizzeria napoletana · Palermo</div></div></div>${sl}<div class="orn"></div>
+        ${F.has("nonno") ? `<div class="nonno blk"><span>👴</span><div><b>Nonno Salvo</b><br>ha acceso il forno nel 1958</div></div>` : ""}
+        <div class="list">${items.map((it, i) => `<div class="li ${F.has("crown") && i === 0 ? "top" : ""}"><span>${F.has("crown") && i === 0 ? "👑 " : ""}${it[0]}</span><span>${it[1]} €</span></div>`).join("")}</div>`;
+    },
+    logo: (F, sl) => `<div class="lg blk">${F.has("mono") ? "R&amp;F" : "⚖"}</div><div class="ttl">Rossi <span class="${F.has("figli") ? "" : "amp"}">&amp; Figli</span></div>
+        <div class="orn"></div><div class="caps sm">Studio legale${F.has("since") ? " · dal 1962" : ""}</div>${sl}`,
+    slide: (F, sl) => {
+      const h = F.has("bars") ? [18, 26, 30, 44, 58, 74, 96] : [30, 45, 60, 80];
+      return `<div class="left"><div class="lg">G</div><div class="ttl">GreenChain</div>${sl}
+        <div class="subt">La filiera agricola, tracciata${F.has("ai") ? " con l'AI" : ""}.</div><div class="orn"></div>
+        ${F.has("ai") ? `<span class="chip">AI-powered</span>` : ""}<div class="sm">Seed round · 2026</div></div>
+        <div class="chart blk">${h.map(v => `<i style="height:${v}%"></i>`).join("")}${F.has("bars") ? "<b>📈</b>" : ""}</div>`;
+    },
+    poster: (F, sl) => `<div class="lg">🏛</div><div class="shapes"><i></i><i></i><i></i></div>
+        <div class="ttl">Festival delle Arti</div>${sl}
+        <div class="dates" style="font-size:${F.has("dates") ? 8.5 : 4.6}cqw">12–20 LUGLIO</div><div class="orn"></div>
+        <div class="sm">Palermo · Centro storico · Ingresso libero</div>
+        ${F.has("spons") ? `<div class="spons">${"<i></i>".repeat(14)}</div>` : ""}`,
+    label: (F, sl) => `<div class="lab blk"><div class="lg">S</div>
+        ${F.has("volcano") ? `<svg viewBox="0 0 100 50"><path d="M4 48 L38 14 L46 18 L54 12 L62 16 L96 48Z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><path d="M50 10 C44 4 54 2 50 -4 M56 9 C62 3 58 0 62 -6" fill="none" stroke="#c0392b" stroke-width="2" stroke-linecap="round"/></svg>` : ""}
+        <div class="ttl">Etna Rosso</div>${sl}<div class="orn" style="width:60%"></div>
+        ${F.has("latin") ? `<div class="motto">EX IGNE VINUM</div>` : ""}
+        <div class="sm">DOC · Vendemmia 2025</div><div class="sm">Cantina Don Saro · 750 ml · 13,5% vol</div></div>`,
+    website: (F, sl) => `<div class="bro"><i></i><i></i><i></i><span>prestige-immobiliare.it</span></div>
+        <div class="nav"><div class="lg">P</div><b>Prestige</b><span>Vendite · Affitti · Chi siamo</span></div>
+        <div class="hero"><div><div class="ttl">Case che parlano di te</div>${sl}<div class="orn" style="margin-top:2cqw"></div>
+          <div class="cta" style="font-size:${F.has("cta") ? 4.6 : 2.4}cqw">Contattaci</div></div>
+          <div class="himg blk">🏡${F.has("car") ? "<small>◀ ● ○ ○ ○ ○ ▶ · vedi tutte</small>" : ""}</div></div>
+        <div class="cards"><i>🏢</i><i>🏠</i><i>🏰</i></div>
+        ${F.has("popup") ? `<div class="pop"><span>✕</span><b>-10% SOLO OGGI!</b><small>Lascia la tua email per l'offerta</small></div>` : ""}`,
+    social: (F, sl) => `<div class="lg">IronFit</div>
+        <div class="ttl">${F.has("fire") ? "🔥 " : ""}Settembre.<br>Rimettiti<br>in forma.${F.has("fire") ? " 🔥" : ""}</div>${sl}<div class="orn" style="width:50%"></div>
+        <div class="sm">Prova gratuita · tutto il mese</div>
+        ${F.has("nopain") ? `<div class="nopain">NO PAIN NO GAIN · NO PAIN NO GAIN</div>` : ""}
+        ${F.has("musc") ? `<div class="musc">💪</div>` : `<div class="smallico">🏋️</div>`}`,
+    signage: (F, sl) => {
+      const big = F.has("arrows");
+      const rows = [["Sale 1–4", "Rooms 1–4 · Säle 1–4", "→"], ["Caffetteria", "Café · Café", "←"], ["Toilette", "Toilets · Toiletten", "↓", "wc"], ["Bookshop", "Bookshop · Buchladen", "↗"]];
+      return `<div class="row"><div class="lg">M</div><div><div class="ttl">Museo Civico</div>${sl}</div></div><div class="orn"></div>
+        ${rows.map(r => `<div class="sg blk ${r[3] && F.has("wc") ? "wc" : ""}"><span>${r[3] && F.has("wc") ? "🚻 " : ""}${r[0]}${F.has("lang") ? `<small>${r[1]}</small>` : ""}</span><span class="ar" style="font-size:${big ? 8 : 4.4}cqw">${r[2]}</span></div>`).join("")}`;
+    }
+  };
+
+  function art(c, p, q, extra = "") {
+    const F = p.f;
+    const foot = [F.has("phone") ? "Tel. 091 555 0123" : "", F.has("fax") ? "Fax 091 555 0124" : ""].filter(Boolean).join(" · ");
+    const cls = ["art", "t-" + c.type, p.bg === "dark" ? "dark" : "", p.grad ? "grad" : "", p.pad, p.round ? "round" : "",
+      q < 20 ? "rough" : "", q >= 45 ? "fine" : "", q >= 80 ? "gold" : "", foot ? "hasfoot" : "", extra].join(" ");
+    const style = `--ar:${AR[c.type]};--c:${p.c};--c2:${p.c2};--pf:${FONTS[p.font]};--ts:${p.ts.toFixed(2)};--ls:${p.ls.toFixed(2)};--tb:${TB[c.type]}`;
+    const sl = F.has("slogan") ? `<div class="x-slogan">${c.slogan}</div>` : "";
+    let ov = `<div class="seal">★</div>`;
+    if (F.has("badge")) ov += `<div class="x-badge">NOVITÀ!</div>`;
+    if (F.has("qr")) ov += `<div class="x-qr"></div>`;
+    if (F.has("stock")) ov += `<div class="x-stock">😁😄😊</div>`;
+    if (F.has("spark")) ov += `<span class="x-spark" style="left:2cqw;bottom:${foot ? 10 : 3}cqw">✨</span><span class="x-spark" style="right:22cqw;top:2cqw">✨</span>`;
+    if (foot) ov += `<div class="x-foot">${foot}</div>`;
+    return `<div class="${cls}" style="${style}"><div class="in">${TPL[c.type](F, sl)}</div>${ov}</div>`;
+  }
+
+  /* ---------------- utilità ---------------- */
+  const $ = id => document.getElementById(id);
+  const el = {
+    round: $("round"), revs: $("revs"), bank: $("bank"), best: $("best"),
+    portrait: $("portrait"), client: $("client"), who: $("who"), job: $("job"), temper: $("temper"),
+    thumb: $("thumb"), thumbArt: $("thumbArt"),
+    qTxt: $("qTxt"), qBar: $("qBar"), rTxt: $("rTxt"), rBar: $("rBar"), fee: $("fee"), loss: $("loss"),
+    log: $("log"), rev: $("revBtn"), peek: $("peekBtn"), ship: $("shipBtn"), brief: $("brief"),
+    pv: $("pv"), pvTitle: $("pvTitle"), pvInfo: $("pvInfo"), pvArt: $("pvArt"), pvText: $("pvText"), pvBack: $("pvBack"), pvShip: $("pvShip"),
+    overlay: $("overlay"), mTitle: $("mTitle"), mBig: $("mBig"), mArt: $("mArt"), mText: $("mText"), mExtra: $("mExtra"), mBtn: $("mBtn")
+  };
+  const eur = n => n.toLocaleString("it-IT") + " €";
+  function pick(a) { return a[Math.floor(Math.random() * a.length)]; }
+  const rand = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
+  const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+  const moodFor = r => r < 0.18 ? "happy" : r < 0.35 ? "content" : r < 0.55 ? "annoyed" : "angry";
+
+  let best = 0;
+  try { best = parseInt(localStorage.getItem("revisione-best") || "0", 10) || 0; } catch (e) {}
+
+  let s, busy = false;
+
+  function newGame() {
+    s = { round: 1, bank: 0, clients: shuffle(CLIENTS).slice(0, ROUNDS), history: [] };
+    startProject();
+  }
+
+  function startProject() {
+    const c = s.c = s.clients[s.round - 1];
+    s.quality = rand(8, 14);
+    s.revs = 0;
+    s.over = false;
+    s.face = null;
+    s.p = { c: c.pal.c, c2: c.pal.c2, font: c.pal.font, ts: 1, ls: 1, bg: "light", pad: "", grad: false, round: false, f: new Set(), v: 1 };
+    // alterna richieste specifiche e generiche, senza ripetizioni
+    const sp = shuffle(c.reqs), ge = shuffle(GENERIC);
+    s.queue = [];
+    const firstSpecific = Math.random() < 0.6;
+    while (sp.length || ge.length) {
+      if (firstSpecific) { if (sp.length) s.queue.push(sp.shift()); if (ge.length) s.queue.push(ge.shift()); }
+      else { if (ge.length) s.queue.push(ge.shift()); if (sp.length) s.queue.push(sp.shift()); }
+    }
+    el.log.innerHTML = "";
+    caption(`Nuovo incarico: ${c.job}`);
+    say("client", c.hi, "content");
+    say("me", c.draft);
+    say("client", c.react, "happy");
+    render();
+  }
+
+  // Probabilità che il cliente molli alla PROSSIMA revisione
+  const risk = () => {
+    const stepQ = 0.027 + 0.06 * (s.c.step - 0.05);
+    return Math.min(0.95, s.c.base + stepQ * s.revs * s.revs);
+  };
+
+  function revise() {
+    if (s.over || busy) return;
+    busy = true;
+    const pr = risk();
+    s.revs++;
+    if (Math.random() < pr) {
+      s.over = true;
+      const lost = s.quality;
+      s.lostQ = lost;
+      s.face = "angry";
+      boom(pick(BOOMS));
+      el.brief.classList.remove("shake"); void el.brief.offsetWidth; el.brief.classList.add("shake");
+      render();
+      setTimeout(() => {
+        say("client", Math.random() < 0.6 ? s.c.ko : pick(ANGRY), "angry");
+        s.history.push({ c: s.c, got: 0, revs: s.revs, fail: true });
+        s.quality = 0;
+        busy = false;
+        render();
+        setTimeout(() => endProject(false, lost), 1400);
+      }, 500);
+      return;
+    }
+    const rq = s.queue.shift() || { t: "Ancora una cosina, piccola piccola…", r: "Sistemata anche questa: ho ritoccato gli ultimi dettagli e ricontrollato tutto. Ormai lo conosco a memoria!", f: () => {} };
+    say("client", rq.t, moodFor(pr));
+    const typing = say("me", `<span class="dots"><span></span><span></span><span></span></span> <i>sto lavorando…</i>`);
+    render();
+    setTimeout(() => {
+      rq.f(s.p);
+      s.p.v++;
+      let gain = Math.max(1, Math.round(rand(2, 12) / (1 + 0.25 * (s.revs - 1))));
+      let extra = "";
+      if (Math.random() < 0.1) { gain += rand(8, 14); extra = `<span class="idea">${pick(IDEAS)}</span>`; }
+      s.quality += gain;
+      typing.querySelector(".txt").innerHTML = `${rq.r}${extra}<br><span class="gain">v${s.p.v} · +${gain} qualità</span>`;
+      el.log.scrollTop = el.log.scrollHeight;
+      busy = false;
+      render();
+    }, 950);
+  }
+
+  /* ---------- anteprima ---------- */
+  function openPreview(toDeliver) {
+    if (busy || s.over) return;
+    const c = s.c;
+    el.pvTitle.textContent = toDeliver ? "Pronto a consegnare?" : "Anteprima del progetto";
+    el.pvInfo.innerHTML = `<span>${c.job}</span><span>Versione ${s.p.v}</span><span>Qualità ${s.quality}</span><span style="color:var(--good)">${eur(s.quality * RATE)}</span>`;
+    el.pvArt.style.setProperty("--r", ratio(c.type));
+    el.pvArt.innerHTML = art(c, s.p, s.quality);
+    el.pvText.textContent = toDeliver
+      ? `Ecco cosa vedrà ${c.who}. Se consegni ora incassi ${eur(s.quality * RATE)}; se torni al lavoro rischi, ma puoi migliorarlo.`
+      : s.quality < 20 ? "Si vede ancora che è una bozza: qualche revisione in più lo renderebbe più convincente."
+      : s.quality < 45 ? "Il progetto sta prendendo forma. Con un po' di cura in più arriverebbero le rifiniture."
+      : s.quality < 80 ? "Lavoro curato e rifinito. Il sigillo d'oro arriva sopra gli 80 punti di qualità."
+      : "Un lavoro da portfolio: vale la pena rischiare ancora?";
+    s.pvMode = toDeliver;
+    el.pv.classList.add("show");
+    (toDeliver ? el.pvShip : el.pvBack).focus();
+  }
+  function closePreview() { el.pv.classList.remove("show"); }
+
+  function deliver() {
+    if (s.over || busy) return;
+    closePreview();
+    s.over = true;
+    s.face = "happy";
+    const got = s.quality * RATE;
+    s.bank += got;
+    s.history.push({ c: s.c, got, revs: s.revs, fail: false });
+    caption("Consegna fatta. Il cliente apre il file…");
+    say("client", Math.random() < 0.7 ? s.c.ok : pick(HAPPY), "happy");
+    render();
+    setTimeout(() => endProject(true, got), 1200);
+  }
+
+  function endProject(ok, value) {
+    const last = s.round >= ROUNDS;
+    const c = s.c;
+    el.mExtra.innerHTML = "";
+    const q = ok ? s.quality : s.lostQ;
+    el.mArt.innerHTML = `<div class="m-art ${ok ? "" : "trashed"}" style="--r:${ratio(c.type)}">${art(c, s.p, q)}${ok ? "" : `<div class="stamp">CESTINATO</div>`}</div>`;
+    if (ok) {
+      el.mTitle.textContent = "Progetto consegnato! ✅";
+      el.mBig.style.color = "var(--good)";
+      el.mBig.textContent = "+" + eur(value);
+      el.mText.textContent = s.revs
+        ? `${c.who} ha approvato dopo ${s.revs} ${s.revs === 1 ? "revisione" : "revisioni"}.`
+        : `${c.who} ha preso la bozza così com'era.`;
+    } else {
+      el.mTitle.textContent = "Progetto cestinato 🗑️";
+      el.mBig.style.color = "var(--bad)";
+      el.mBig.textContent = "0 €";
+      el.mText.textContent = `${c.who} si è stufato alla revisione ${s.revs}. Avevi in mano un progetto da ${eur(value * RATE)}.`;
+    }
+    el.mBtn.textContent = last ? "Chiudi l'anno fiscale" : `Prossimo cliente (${s.round + 1}/${ROUNDS}) →`;
+    el.mBtn.onclick = () => {
+      if (last) return finalScreen();
+      s.round++;
+      hide();
+      startProject();
+    };
+    show();
+  }
+
+  function finalScreen() {
+    const record = s.bank > best;
+    if (record) { best = s.bank; try { localStorage.setItem("revisione-best", String(best)); } catch (e) {} }
+    el.mArt.innerHTML = "";
+    if (s.bank < COSTS) {
+      el.mTitle.textContent = "📉 Studio in rosso";
+      el.mBig.style.color = "var(--bad)";
+      el.mBig.textContent = eur(s.bank);
+      el.mText.textContent = `Le spese fisse erano ${eur(COSTS)}: mancano ${eur(COSTS - s.bank)}. Lo studio chiude. Partita persa.`;
+    } else {
+      el.mTitle.textContent = record ? "🏆 Anno record!" : "Bilancio dell'anno";
+      el.mBig.style.color = "var(--ink)";
+      el.mBig.textContent = eur(s.bank);
+      el.mText.textContent = verdict(s.bank) + (record ? "" : ` Il tuo record è ${eur(best)}.`);
+    }
+    el.mExtra.innerHTML = '<div class="summary">' + s.history.map(h =>
+      `<div><span>${h.c.name} · ${h.revs} rev.</span><b style="color:${h.fail ? "var(--bad)" : "var(--good)"}">${h.fail ? "cestinato" : eur(h.got)}</b></div>`
+    ).join("") + "</div>";
+    el.mBtn.textContent = "Riapri lo studio";
+    el.mBtn.onclick = () => { hide(); newGame(); };
+    render();
+    show();
+  }
+
+  function verdict(n) {
+    if (n >= 20000) return "Agenzia di grido: i clienti fanno la fila.";
+    if (n >= 14000) return "Ottimo anno, lo studio cresce.";
+    if (n >= 9000) return "Anno solido, bollette pagate.";
+    if (n >= 5000) return "Si tira avanti. Magari meno revisioni?";
+    return "Forse era meglio il posto fisso.";
+  }
+
+  /* ---------- fumetto ---------- */
+  function say(kind, html, mood) {
+    const b = document.createElement("div");
+    b.className = "msg " + kind;
+    const isMe = kind === "me";
+    const face = isMe ? person(ME.look, "happy") : person(s.c.look, mood || "content");
+    b.innerHTML = `<div class="hd">${face}</div><div class="balloon"><span class="who">${isMe ? ME.name : s.c.who}</span><span class="txt">${html}</span></div>`;
+    el.log.appendChild(b);
+    el.log.scrollTop = el.log.scrollHeight;
+    return b;
+  }
+  function caption(text) {
+    const b = document.createElement("div");
+    b.className = "caption";
+    b.textContent = text;
+    el.log.appendChild(b);
+    el.log.scrollTop = el.log.scrollHeight;
+  }
+  function boom(text) {
+    const b = document.createElement("div");
+    b.className = "boom";
+    b.textContent = text;
+    el.log.appendChild(b);
+    el.log.scrollTop = el.log.scrollHeight;
+  }
+
+  function show() { el.overlay.classList.add("show"); el.mBtn.focus(); }
+  function hide() { el.overlay.classList.remove("show"); }
+
+  function render() {
+    const c = s.c;
+    el.round.textContent = `${s.round}/${ROUNDS}`;
+    el.revs.textContent = s.revs;
+    el.bank.textContent = eur(s.bank);
+    el.best.textContent = eur(best);
+    el.client.textContent = c.name;
+    el.who.textContent = c.who;
+    el.job.textContent = c.job;
+    el.temper.textContent = "Carattere: " + c.temper;
+
+    const r = risk();
+    el.portrait.innerHTML = person(c.look, s.face || moodFor(r));
+
+    const q = s.over && s.lostQ !== undefined && s.quality === 0 ? s.lostQ : s.quality;
+    el.thumbArt.style.setProperty("--r", ratio(c.type));
+    el.thumbArt.innerHTML = art(c, s.p, q);
+
+    el.qTxt.textContent = s.quality;
+    el.qBar.style.width = Math.min(100, s.quality / 1.2) + "%";
+
+    const pct = s.over ? 0 : Math.round(r * 100);
+    el.rTxt.textContent = s.over ? "—" : pct + "%";
+    const col = pct >= 40 ? "var(--bad)" : pct >= 20 ? "var(--warn)" : "var(--good)";
+    el.rTxt.style.color = col;
+    el.rBar.style.width = Math.max(pct, 2) + "%";
+    el.rBar.style.backgroundColor = col;
+
+    el.fee.textContent = eur(s.quality * RATE);
+    el.loss.textContent = "−" + eur(s.quality * RATE);
+    const off = s.over || busy;
+    el.rev.disabled = off;
+    el.ship.disabled = off;
+    el.peek.disabled = off;
+  }
+
+  el.rev.addEventListener("click", revise);
+  el.peek.addEventListener("click", () => openPreview(false));
+  el.thumb.addEventListener("click", () => openPreview(false));
+  el.ship.addEventListener("click", () => openPreview(true));
+  el.pvShip.addEventListener("click", deliver);
+  el.pvBack.addEventListener("click", closePreview);
+  el.pv.addEventListener("click", e => { if (e.target === el.pv) closePreview(); });
+
+  document.addEventListener("keydown", e => {
+    if (el.overlay.classList.contains("show")) {
+      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); el.mBtn.click(); }
+      return;
+    }
+    if (el.pv.classList.contains("show")) {
+      if (e.key === "Escape") closePreview();
+      else if (e.key.toLowerCase() === "c" || (e.key === "Enter" && s.pvMode)) { e.preventDefault(); deliver(); }
+      else if (e.key === "Enter") { e.preventDefault(); closePreview(); }
+      return;
+    }
+    if (e.key === " " || e.key === "Enter") { e.preventDefault(); revise(); }
+    else if (e.key.toLowerCase() === "a") openPreview(false);
+    else if (e.key.toLowerCase() === "c") openPreview(true);
+  });
+
+  newGame();
+})();
+</script>
+</body>
+</html>
