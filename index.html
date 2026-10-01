@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ultima Revisione</title>
+<style>
+  :root {
+    --bg: #f4f1ec;
+    --paper: #ffffff;
+    --ink: #1d1b19;
+    --muted: #77716a;
+    --line: #e2ddd5;
+    --accent: #3b5bdb;
+    --good: #2f9e5f;
+    --warn: #e08a1e;
+    --bad: #d6402f;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding: 16px;
+  }
+  main { width: 100%; max-width: 760px; }
+  header { margin-bottom: 14px; }
+  h1 { margin: 0; font-size: clamp(1.6rem, 5vw, 2.3rem); letter-spacing: -0.02em; }
+  h1 span { color: var(--accent); }
+  .sub { color: var(--muted); margin: 4px 0 0; }
+
+  .stats { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin: 14px 0; }
+  .stat { background: var(--paper); border: 1px solid var(--line); border-radius: 12px; padding: 10px 8px; text-align: center; }
+  .stat .lbl { font-size: .7rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+  .stat .val { font-size: 1.25rem; font-weight: 700; margin-top: 2px; font-variant-numeric: tabular-nums; }
+  .stat.earn .val { color: var(--good); }
+
+  .brief { background: var(--paper); border: 1px solid var(--line); border-radius: 14px; padding: 16px; margin-bottom: 12px; }
+  .brief-head { display: flex; align-items: center; gap: 12px; }
+  .avatar { width: 48px; height: 48px; border-radius: 12px; display: grid; place-items: center; font-size: 1.6rem; background: var(--bg); flex-shrink: 0; }
+  .client { font-weight: 700; font-size: 1.1rem; }
+  .job { color: var(--muted); font-size: .9rem; }
+  .temper { margin-left: auto; font-size: .75rem; padding: 4px 10px; border-radius: 99px; background: var(--bg); color: var(--muted); white-space: nowrap; }
+
+  .meters { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+  .meter .top { display: flex; justify-content: space-between; font-size: .85rem; margin-bottom: 6px; }
+  .meter .top b { font-variant-numeric: tabular-nums; }
+  .bar { height: 12px; background: var(--bg); border-radius: 99px; overflow: hidden; }
+  .bar i { display: block; height: 100%; width: 0; border-radius: 99px; transition: width .4s ease, background-color .4s; }
+  #qBar { background: var(--accent); }
+  .fee-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 14px; }
+  .fee { font-size: .95rem; color: var(--muted); padding: 10px 12px; border-radius: 10px; background: var(--bg); }
+  .fee b { display: block; font-size: 1.15rem; font-variant-numeric: tabular-nums; margin-top: 2px; }
+  .fee.win b { color: var(--good); }
+  .fee.lose b { color: var(--bad); }
+
+  .log { background: var(--paper); border: 1px solid var(--line); border-radius: 14px; padding: 12px; height: 220px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
+  .bubble { max-width: 85%; padding: 8px 12px; border-radius: 12px; font-size: .92rem; line-height: 1.4; animation: pop .25s ease both; }
+  .bubble.client { background: var(--bg); align-self: flex-start; border-bottom-left-radius: 4px; }
+  .bubble.me { background: var(--accent); color: #fff; align-self: flex-end; border-bottom-right-radius: 4px; }
+  .bubble.sys { align-self: center; background: none; color: var(--muted); font-size: .8rem; font-style: italic; }
+  .bubble.fail { background: #fbe4e1; color: var(--bad); align-self: stretch; max-width: 100%; text-align: center; font-weight: 600; }
+  .bubble .gain { font-weight: 700; }
+  @keyframes pop { from { transform: translateY(6px); opacity: 0; } to { transform: none; opacity: 1; } }
+  .shake { animation: shake .4s; }
+  @keyframes shake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
+
+  .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+  button { font: inherit; font-weight: 700; font-size: 1.02rem; padding: 14px; border-radius: 12px; border: none; cursor: pointer; transition: transform .08s, filter .15s, opacity .15s; }
+  button:active { transform: scale(.97); }
+  button:disabled { opacity: .4; cursor: not-allowed; }
+  button:not(:disabled):hover { filter: brightness(1.08); }
+  .rev { background: var(--accent); color: #fff; }
+  .ship { background: var(--good); color: #fff; }
+  .keys { text-align: center; color: var(--muted); font-size: .78rem; margin-top: 8px; }
+
+  details { margin-top: 16px; background: var(--paper); border: 1px solid var(--line); border-radius: 12px; padding: 10px 14px; }
+  summary { cursor: pointer; font-weight: 600; }
+  details li { color: var(--muted); font-size: .9rem; line-height: 1.5; }
+
+  .overlay { position: fixed; inset: 0; background: rgba(29,27,25,.55); display: none; align-items: center; justify-content: center; padding: 16px; z-index: 10; }
+  .overlay.show { display: flex; }
+  .modal { background: var(--paper); border-radius: 16px; padding: 24px; max-width: 420px; width: 100%; text-align: center; animation: pop .25s ease both; }
+  .modal h2 { margin: 0 0 6px; }
+  .modal p { color: var(--muted); line-height: 1.5; }
+  .modal .big { font-size: 2.3rem; font-weight: 800; margin: 6px 0; font-variant-numeric: tabular-nums; }
+  .modal button { width: 100%; margin-top: 10px; }
+  .summary { text-align: left; margin: 12px 0; font-size: .88rem; border-top: 1px solid var(--line); }
+  .summary div { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--line); }
+
+  @media (max-width: 520px) {
+    .stats { grid-template-columns: repeat(2, 1fr); }
+    .stats .stat:last-child { grid-column: span 2; }
+    .meters { grid-template-columns: 1fr; }
+    .temper { display: none; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>Ultima <span>Revisione</span></h1>
+    <p class="sub">La bozza è consegnata. Ancora un ritocco… o incassi adesso?</p>
+  </header>
+
+  <section class="stats">
+    <div class="stat"><div class="lbl">Progetto</div><div class="val" id="round">1/5</div></div>
+    <div class="stat"><div class="lbl">Revisioni</div><div class="val" id="revs">0</div></div>
+    <div class="stat earn"><div class="lbl">Incassato</div><div class="val" id="bank">0 €</div></div>
+    <div class="stat"><div class="lbl">Spese fisse</div><div class="val" id="costs">5.000 €</div></div>
+    <div class="stat"><div class="lbl">Record</div><div class="val" id="best">0 €</div></div>
+  </section>
+
+  <section class="brief" id="brief">
+    <div class="brief-head">
+      <div class="avatar" id="avatar">🍕</div>
+      <div>
+        <div class="client" id="client"></div>
+        <div class="job" id="job"></div>
+      </div>
+      <div class="temper" id="temper"></div>
+    </div>
+    <div class="meters">
+      <div class="meter">
+        <div class="top"><span>Qualità del progetto</span><b id="qTxt">0</b></div>
+        <div class="bar"><i id="qBar"></i></div>
+      </div>
+      <div class="meter">
+        <div class="top"><span>Rischio che il cliente molli</span><b id="rTxt">0%</b></div>
+        <div class="bar"><i id="rBar"></i></div>
+      </div>
+    </div>
+    <div class="fee-row">
+      <div class="fee win">Se consegni ora incassi <b id="fee">0 €</b></div>
+      <div class="fee lose">Se il cliente molla perdi <b id="loss">0 €</b></div>
+    </div>
+  </section>
+
+  <section class="log" id="log"></section>
+
+  <section class="actions">
+    <button class="rev" id="revBtn">✏️ Un'altra revisione</button>
+    <button class="ship" id="shipBtn">📦 Consegna e fattura</button>
+  </section>
+  <div class="keys">Tastiera: Spazio = revisione · C = consegna</div>
+
+  <details>
+    <summary>Come si gioca</summary>
+    <ul>
+      <li>Cinque clienti, un progetto ciascuno. Parti sempre da una bozza già consegnata.</li>
+      <li>Ogni revisione alza la qualità di un valore casuale e quindi il compenso.</li>
+      <li>Ma ogni revisione consuma la pazienza del cliente: prima di ogni ritocco c'è la probabilità mostrata che si stufi e butti via tutto. In quel caso il progetto vale zero.</li>
+      <li>Ogni cliente ha un carattere diverso: alcuni sopportano molte revisioni, altri esplodono presto.</li>
+      <li>Consegna quando vuoi per incassare. Alla fine si conta il totale.</li>
+    </ul>
+  </details>
+</main>
+
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <h2 id="mTitle"></h2>
+    <div class="big" id="mBig"></div>
+    <p id="mText"></p>
+    <div id="mExtra"></div>
+    <button class="rev" id="mBtn"></button>
+  </div>
+</div>
+
+<script>
+(() => {
+  const ROUNDS = 5;
+  const RATE = 100; // € per punto qualità
+  const COSTS = 5000; // spese fisse da coprire
+
+  const CLIENTS = [
+    { ico: "🍕", name: "Pizzeria Da Totò", job: "Nuovo menù e insegna", base: 0.06, step: 0.07, temper: "Alla mano" },
+    { ico: "⚖️", name: "Studio Legale Rossi & Figli", job: "Restyling del logo", base: 0.08, step: 0.09, temper: "Formale" },
+    { ico: "🚀", name: "Startup GreenChain", job: "Pitch deck per investitori", base: 0.04, step: 0.12, temper: "Frenetico" },
+    { ico: "🏛️", name: "Assessorato alla Cultura", job: "Identità di un festival", base: 0.03, step: 0.05, temper: "Paziente (e lento)" },
+    { ico: "🍷", name: "Cantina Etna Rosso", job: "Etichetta della nuova annata", base: 0.05, step: 0.08, temper: "Esigente" },
+    { ico: "🏠", name: "Immobiliare Prestige", job: "Sito vetrina", base: 0.10, step: 0.10, temper: "Impaziente" },
+    { ico: "💪", name: "Palestra IronFit", job: "Campagna social di settembre", base: 0.07, step: 0.08, temper: "Energico" },
+    { ico: "🖼️", name: "Museo Civico", job: "Allestimento e segnaletica", base: 0.04, step: 0.06, temper: "Riflessivo" }
+  ];
+
+  const REQUESTS = [
+    "Possiamo fare il logo più grande?",
+    "Mi piace, ma proviamo in blu?",
+    "Mia nipote dice che il font è vecchio.",
+    "Si può rendere più… moderno?",
+    "Togliamo lo spazio bianco, sembra vuoto.",
+    "Il concorrente ha fatto una cosa simile, ma meglio.",
+    "Rimettiamo la versione di prima, ma diversa.",
+    "Deve 'spaccare' di più.",
+    "Il capo ha visto e vuole più colore.",
+    "Aggiungiamo anche il numero di telefono. E il fax.",
+    "Si può fare tutto ma più piccolo?",
+    "Ottimo! Solo una piccola cosa…",
+    "Proviamo con una foto di stock sorridente.",
+    "Ci serve per domani, ma senza fretta."
+  ];
+  const ANGRY = [
+    "Sa cosa? Lasciamo perdere. Lo fa mio cugino.",
+    "Basta, ci ho ripensato: niente progetto.",
+    "Abbiamo deciso di usare un template online.",
+    "Troppe versioni, non ci capiamo più. Chiudiamo qui.",
+    "Il budget è stato spostato su altro. Mi spiace."
+  ];
+  const HAPPY = [
+    "Perfetto, lo mandiamo in stampa!",
+    "Bellissimo, grazie. Mandi pure la fattura.",
+    "Esattamente quello che avevo in mente.",
+    "Ci piace. Pubblichiamo."
+  ];
+
+  const $ = id => document.getElementById(id);
+  const el = {
+    round: $("round"), revs: $("revs"), bank: $("bank"), best: $("best"),
+    avatar: $("avatar"), client: $("client"), job: $("job"), temper: $("temper"),
+    qTxt: $("qTxt"), qBar: $("qBar"), rTxt: $("rTxt"), rBar: $("rBar"), fee: $("fee"), loss: $("loss"),
+    log: $("log"), rev: $("revBtn"), ship: $("shipBtn"), brief: $("brief"),
+    overlay: $("overlay"), mTitle: $("mTitle"), mBig: $("mBig"), mText: $("mText"), mExtra: $("mExtra"), mBtn: $("mBtn")
+  };
+
+  const eur = n => n.toLocaleString("it-IT") + " €";
+  const pick = a => a[Math.floor(Math.random() * a.length)];
+  const rand = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
+
+  let best = 0;
+  try { best = parseInt(localStorage.getItem("revisione-best") || "0", 10) || 0; } catch (e) {}
+
+  let s;
+
+  function newGame() {
+    const pool = CLIENTS.slice();
+    for (let i = pool.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [pool[i], pool[j]] = [pool[j], pool[i]]; }
+    s = { round: 1, bank: 0, clients: pool.slice(0, ROUNDS), history: [] };
+    startProject();
+  }
+
+  function startProject() {
+    s.c = s.clients[s.round - 1];
+    s.quality = rand(8, 14);
+    s.revs = 0;
+    s.over = false;
+    el.log.innerHTML = "";
+    say("sys", `Nuovo incarico: ${s.c.job}`);
+    say("me", `Ecco la bozza! (qualità ${s.quality})`);
+    say("client", "Grazie, la guardo. Intanto… qualche ritocco?");
+    render();
+  }
+
+  // Probability the client gives up on the NEXT revision (revision n = s.revs + 1).
+  // Quadratic growth: base + step' × (n−1)², with step rescaled affinely so every
+  // client lands at 45–60% on the 5th revision and above 75% on the 7th.
+  const risk = () => {
+    const stepQ = 0.027 + 0.06 * (s.c.step - 0.05);
+    return Math.min(0.95, s.c.base + stepQ * s.revs * s.revs);
+  };
+
+  function revise() {
+    if (s.over) return;
+    const p = risk();
+    s.revs++;
+    say("client", pick(REQUESTS));
+    if (Math.random() < p) {
+      s.over = true;
+      const lost = s.quality;
+      say("fail", "💥 " + pick(ANGRY));
+      el.brief.classList.remove("shake"); void el.brief.offsetWidth; el.brief.classList.add("shake");
+      s.quality = 0;
+      s.history.push({ c: s.c, got: 0, revs: s.revs, fail: true });
+      render();
+      setTimeout(() => endProject(false, lost), 1100);
+      return;
+    }
+    // Diminishing returns: revision n is worth 1 / (1 + 0.25·(n−1)) of the roll (5th ≈ half)
+    let gain = Math.max(1, Math.round(rand(2, 12) / (1 + 0.25 * (s.revs - 1))));
+    let note = "";
+    if (Math.random() < 0.1) { gain += rand(8, 14); note = " 💡 Intuizione!"; }
+    s.quality += gain;
+    say("me", `Fatto, nuova versione.<span class="gain"> +${gain} qualità${note}</span>`);
+    render();
+  }
+
+  function deliver() {
+    if (s.over) return;
+    s.over = true;
+    const got = s.quality * RATE;
+    s.bank += got;
+    s.history.push({ c: s.c, got, revs: s.revs, fail: false });
+    say("client", pick(HAPPY));
+    render();
+    setTimeout(() => endProject(true, got), 600);
+  }
+
+  function endProject(ok, value) {
+    const last = s.round >= ROUNDS;
+    el.mExtra.innerHTML = "";
+    if (ok) {
+      el.mTitle.textContent = "Progetto consegnato ✅";
+      el.mBig.style.color = "var(--good)";
+      el.mBig.textContent = "+" + eur(value);
+      el.mText.textContent = s.revs
+        ? `${s.c.name} ha approvato dopo ${s.revs} ${s.revs === 1 ? "revisione" : "revisioni"}.`
+        : `${s.c.name} ha preso la bozza così com'era.`;
+    } else {
+      el.mTitle.textContent = "Progetto cestinato 🗑️";
+      el.mBig.style.color = "var(--bad)";
+      el.mBig.textContent = "0 €";
+      el.mText.textContent = `${s.c.name} si è stufato alla revisione ${s.revs}. Avevi un progetto da ${eur(value * RATE)}.`;
+    }
+    el.mBtn.textContent = last ? "Chiudi l'anno fiscale" : `Prossimo cliente (${s.round + 1}/${ROUNDS}) →`;
+    el.mBtn.onclick = () => {
+      if (last) return finalScreen();
+      s.round++;
+      hide();
+      startProject();
+    };
+    show();
+  }
+
+  function finalScreen() {
+    const record = s.bank > best;
+    if (record) { best = s.bank; try { localStorage.setItem("revisione-best", String(best)); } catch (e) {} }
+    if (s.bank < COSTS) {
+      el.mTitle.textContent = "📉 Studio in rosso";
+      el.mBig.style.color = "var(--bad)";
+      el.mBig.textContent = eur(s.bank);
+      el.mText.textContent = `Le spese fisse erano ${eur(COSTS)}: mancano ${eur(COSTS - s.bank)}. Lo studio chiude. Partita persa.`;
+    } else {
+      el.mTitle.textContent = record ? "🏆 Anno record!" : "Bilancio dell'anno";
+      el.mBig.style.color = "var(--ink)";
+      el.mBig.textContent = eur(s.bank);
+      el.mText.textContent = verdict(s.bank) + (record ? "" : ` Il tuo record è ${eur(best)}.`);
+    }
+    el.mExtra.innerHTML = '<div class="summary">' + s.history.map(h =>
+      `<div><span>${h.c.ico} ${h.c.name} · ${h.revs} rev.</span><b style="color:${h.fail ? "var(--bad)" : "var(--good)"}">${h.fail ? "cestinato" : eur(h.got)}</b></div>`
+    ).join("") + "</div>";
+    el.mBtn.textContent = "Riapri lo studio";
+    el.mBtn.onclick = () => { hide(); newGame(); };
+    render();
+    show();
+  }
+
+  function verdict(n) {
+    if (n >= 20000) return "Agenzia di grido: i clienti fanno la fila.";
+    if (n >= 14000) return "Ottimo anno, lo studio cresce.";
+    if (n >= 9000) return "Anno solido, bollette pagate.";
+    if (n >= 5000) return "Si tira avanti. Magari meno revisioni?";
+    return "Forse era meglio il posto fisso.";
+  }
+
+  function say(kind, html) {
+    const b = document.createElement("div");
+    b.className = "bubble " + kind;
+    b.innerHTML = html;
+    el.log.appendChild(b);
+    el.log.scrollTop = el.log.scrollHeight;
+  }
+
+  function show() { el.overlay.classList.add("show"); el.mBtn.focus(); }
+  function hide() { el.overlay.classList.remove("show"); }
+
+  function render() {
+    el.round.textContent = `${s.round}/${ROUNDS}`;
+    el.revs.textContent = s.revs;
+    el.bank.textContent = eur(s.bank);
+    el.best.textContent = eur(best);
+    el.avatar.textContent = s.c.ico;
+    el.client.textContent = s.c.name;
+    el.job.textContent = s.c.job;
+    el.temper.textContent = "Carattere: " + s.c.temper;
+
+    el.qTxt.textContent = s.quality;
+    el.qBar.style.width = Math.min(100, s.quality / 1.2) + "%";
+
+    const pct = s.over ? 0 : Math.round(risk() * 100);
+    el.rTxt.textContent = s.over ? "—" : pct + "%";
+    const col = pct >= 40 ? "var(--bad)" : pct >= 20 ? "var(--warn)" : "var(--good)";
+    el.rTxt.style.color = col;
+    el.rBar.style.width = Math.max(pct, 2) + "%";
+    el.rBar.style.backgroundColor = col;
+
+    el.fee.textContent = eur(s.quality * RATE);
+    el.loss.textContent = "−" + eur(s.quality * RATE);
+    el.rev.disabled = s.over;
+    el.ship.disabled = s.over;
+  }
+
+  el.rev.addEventListener("click", revise);
+  el.ship.addEventListener("click", deliver);
+  document.addEventListener("keydown", e => {
+    if (el.overlay.classList.contains("show")) {
+      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); el.mBtn.click(); }
+      return;
+    }
+    if (e.key === " " || e.key === "Enter") { e.preventDefault(); revise(); }
+    else if (e.key.toLowerCase() === "c") { deliver(); }
+  });
+
+  newGame();
+})();
+</script>
+</body>
+</html>
